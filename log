@@ -1,0 +1,550 @@
+
+
+==============================================================================
+dap:                                                                      1 ❌
+
+dap: Adapters ~
+
+dap.adapter: go ~
+- ❌ ERROR `command` is not executable. Check path and permissions. Use vim.fn.expand to handle ~ or $HOME:
+     dlv
+
+dap.adapter: python ~
+- ✅ OK is executable: python
+
+dap: Sessions ~
+- ✅ OK No active sessions
+
+==============================================================================
+lazy:                                                               2 ⚠️  1 ❌
+
+lazy.nvim ~
+- {lazy.nvim} version `11.17.5`
+- ✅ OK {git} `version 2.43.0`
+- ✅ OK no existing packages found by other package managers
+- ✅ OK packer_compiled.lua not found
+
+luarocks ~
+- checking `hererocks` installation
+- ✅ OK no plugins require `luarocks`, so you can ignore any warnings below
+- ✅ OK {python3} `Python 3.12.3`
+- ❌ ERROR {/home/a3213/.local/share/nvim/lazy-rocks/hererocks/bin/luarocks} not installed
+- ⚠️ WARNING {/home/a3213/.local/share/nvim/lazy-rocks/hererocks/bin/lua} version `5.1` not installed
+- ⚠️ WARNING Lazy won't be able to install plugins that require `luarocks`.
+  Here's what you can do:
+   - fix your `luarocks` installation
+   - disable *hererocks* with `opts.rocks.hererocks = false`
+   - disable `luarocks` support completely with `opts.rocks.enabled = false`
+
+==============================================================================
+lspconfig:                                                                  ✅
+
+- Skipped. This healthcheck is redundant with `:checkhealth vim.lsp`.
+
+==============================================================================
+luasnip:                                                                  1 ⚠️
+
+luasnip ~
+- ⚠️ WARNING For Variable/Placeholder-transformations, luasnip requires
+      the jsregexp library. See `:help |luasnip-lsp-snippets-transformations`| for advice
+  
+
+==============================================================================
+mason:                                                                   10 ⚠️
+
+mason.nvim ~
+- ✅ OK mason.nvim version v2.2.1
+- ✅ OK PATH: prepend
+- ✅ OK Providers: 
+    mason.providers.registry-api
+    mason.providers.client
+- ✅ OK neovim version >= 0.10.0
+
+mason.nvim [Registries] ~
+- ✅ OK Registry `github.com/mason-org/mason-registry version: 2026-04-22-still-rose` is installed.
+- ✅ OK Registry `SynthesizedRegistrySource` is installed.
+
+mason.nvim [Core utils] ~
+- ✅ OK unzip: `UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.`
+- ✅ OK wget: `GNU Wget 1.21.4, a non-interactive network retriever.`
+- ✅ OK curl: `curl 8.5.0 (x86_64-pc-linux-gnu) libcurl/8.5.0 OpenSSL/3.0.13 zlib/1.3 brotli/1.1.0 zstd/1.5.5 libidn2/2.3.7 libpsl/0.21.2 (+libidn2/2.3.7) libssh/0.10.6/openssl/zlib nghttp2/1.59.0 librtmp/2.3 OpenLDAP/2.6.7`
+- ✅ OK gzip: `gzip 1.12`
+- ✅ OK tar: `tar (GNU tar) 1.35`
+- ✅ OK bash: `GNU bash, version 5.2.21(1)-release (x86_64-pc-linux-gnu)`
+
+mason.nvim [Languages] ~
+- ⚠️ WARNING cargo: not available
+  - ADVICE:
+    - spawn: cargo failed with exit code - and signal -. Could not find executable "cargo" in PATH.
+
+- ⚠️ WARNING luarocks: not available
+  - ADVICE:
+    - spawn: luarocks failed with exit code - and signal -. Could not find executable "luarocks" in PATH.
+
+- ⚠️ WARNING Ruby: not available
+  - ADVICE:
+    - spawn: ruby failed with exit code - and signal -. Could not find executable "ruby" in PATH.
+
+- ⚠️ WARNING RubyGem: not available
+  - ADVICE:
+    - spawn: gem failed with exit code - and signal -. Could not find executable "gem" in PATH.
+
+- ⚠️ WARNING Composer: not available
+  - ADVICE:
+    - spawn: composer failed with exit code - and signal -. Could not find executable "composer" in PATH.
+
+- ⚠️ WARNING PHP: not available
+  - ADVICE:
+    - spawn: php failed with exit code - and signal -. Could not find executable "php" in PATH.
+
+- ⚠️ WARNING javac: not available
+  - ADVICE:
+    - spawn: javac failed with exit code - and signal -. Could not find executable "javac" in PATH.
+
+- ⚠️ WARNING java: not available
+  - ADVICE:
+    - spawn: java failed with exit code - and signal -. Could not find executable "java" in PATH.
+
+- ⚠️ WARNING julia: not available
+  - ADVICE:
+    - spawn: julia failed with exit code - and signal -. Could not find executable "julia" in PATH.
+
+- ✅ OK python: `Python 3.12.3`
+- ✅ OK node: `v24.14.1`
+- ✅ OK Go: `go version go1.25.2 linux/amd64`
+- ⚠️ WARNING pip: not available
+  - ADVICE:
+    - spawn: python3 failed with exit code 1 and signal 0. /usr/bin/python3: No module named pip
+
+- ✅ OK npm: `11.11.0`
+- ✅ OK python venv: `Ok`
+
+==============================================================================
+mason-lspconfig:                                                            ✅
+
+mason-lspconfig.nvim ~
+- ✅ OK Neovim v0.11
+- ✅ OK mason.nvim v2
+
+==============================================================================
+nvim-treesitter:                                                          1 ❌
+
+Requirements ~
+- ✅ OK Neovim was compiled with tree-sitter runtime ABI version 15 (required >=13).
+- ❌ ERROR tree-sitter-cli not found
+- ✅ OK tar 1.35.0 (/usr/bin/tar)
+- ✅ OK curl 8.5.0 (/usr/bin/curl)
+  curl 8.5.0 (x86_64-pc-linux-gnu) libcurl/8.5.0 OpenSSL/3.0.13 zlib/1.3 brotli/1.1.0 zstd/1.5.5 libidn2/2.3.7 libpsl/0.21.2 (+libidn2/2.3.7) libssh/0.10.6/openssl/zlib nghttp2/1.59.0 librtmp/2.3 OpenLDAP/2.6.7
+  Release-Date: 2023-12-06, security patched: 8.5.0-2ubuntu10.8
+  Protocols: dict file ftp ftps gopher gophers http https imap imaps ldap ldaps mqtt pop3 pop3s rtmp rtsp scp sftp smb smbs smtp smtps telnet tftp
+  Features: alt-svc AsynchDNS brotli GSS-API HSTS HTTP2 HTTPS-proxy IDN IPv6 Kerberos Largefile libz NTLM PSL SPNEGO SSL threadsafe TLS-SRP UnixSockets zstd
+
+OS Info ~
+- release: 6.6.87.2-microsoft-standard-WSL2
+- machine: x86_64
+- sysname: Linux
+- version: #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025
+
+Install directory for parsers and queries ~
+- /home/a3213/.local/share/nvim/site
+- ✅ OK is writable.
+- ✅ OK is in runtimepath.
+
+Installed languages     H L F I J ~
+
+  Legend: [H]ighlights, [L]ocals, [F]olds, [I]ndents, In[J]ections ~
+
+==============================================================================
+telescope:                                                          1 ⚠️  1 ❌
+
+Checking for required plugins ~
+- ✅ OK plenary installed.
+
+Checking external dependencies ~
+- ❌ ERROR rg: not found. `live-grep` finder will not function without [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) installed.
+- ⚠️ WARNING fd: not found. Install [sharkdp/fd](https://github.com/sharkdp/fd) for extended capabilities
+
+===== Installed extensions ===== ~
+
+==============================================================================
+vim.deprecated:                                                             ✅
+
+- ✅ OK No deprecated functions detected
+
+==============================================================================
+vim.health:                                                               1 ⚠️
+
+System Info ~
+- ✅ OK Up to date (0.12.1)
+- Nvim version: `v0.12.1` 
+- Operating system: Linux 6.6.87.2-microsoft-standard-WSL2
+- Terminal: unknown
+- $TERM: xterm-256color
+
+Configuration ~
+- ✅ OK no issues found
+
+Runtime ~
+- ✅ OK $VIMRUNTIME: /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime
+
+Performance ~
+- ✅ OK Build type: Release
+
+Remote Plugins ~
+- ✅ OK Up to date
+
+Terminal ~
+- key_backspace (kbs) terminfo entry: `key_backspace=\177`
+- key_dc (kdch1) terminfo entry: `key_dc=\E[3~`
+
+External Tools ~
+- ⚠️ WARNING ripgrep not available
+- ✅ OK vim.ui.open: handler found (explorer.exe)
+- ✅ OK git version 2.43.0 (/usr/bin/git)
+- ✅ OK curl 8.5.0 (/usr/bin/curl)
+  curl 8.5.0 (x86_64-pc-linux-gnu) libcurl/8.5.0 OpenSSL/3.0.13 zlib/1.3 brotli/1.1.0 zstd/1.5.5 libidn2/2.3.7 libpsl/0.21.2 (+libidn2/2.3.7) libssh/0.10.6/openssl/zlib nghttp2/1.59.0 librtmp/2.3 OpenLDAP/2.6.7
+  Release-Date: 2023-12-06, security patched: 8.5.0-2ubuntu10.8
+  Protocols: dict file ftp ftps gopher gophers http https imap imaps ldap ldaps mqtt pop3 pop3s rtmp rtsp scp sftp smb smbs smtp smtps telnet tftp
+  Features: alt-svc AsynchDNS brotli GSS-API HSTS HTTP2 HTTPS-proxy IDN IPv6 Kerberos Largefile libz NTLM PSL SPNEGO SSL threadsafe TLS-SRP UnixSockets zstd
+  curl-related environment variables:
+    https_proxy=http://127.0.0.1:7890
+    http_proxy=http://127.0.0.1:7890
+    no_proxy=192.168.*,172.31.*,172.30.*,172.29.*,172.28.*,172.27.*,172.26.*,172.25.*,172.24.*,172.23.*,172.22.*,172.21.*,172.20.*,172.19.*,172.18.*,172.17.*,172.16.*,10.*,127.*,localhost,<local>
+
+==============================================================================
+vim.lsp:                                                                  6 ⚠️
+
+- LSP log level : WARN
+- Log path: /home/a3213/.local/state/nvim/lsp.log
+- Log size: 72 KB
+
+vim.lsp: Active Features ~
+
+vim.lsp: Active Clients ~
+- No active clients
+
+vim.lsp: Enabled Configurations ~
+- ⚠️ WARNING Unknown filetype 'gowork' (Hint: filename extension != filetype).
+- ⚠️ WARNING Unknown filetype 'gotmpl' (Hint: filename extension != filetype).
+- gopls:
+  - capabilities: {
+      textDocument = {
+        completion = {
+          completionItem = {
+            commitCharactersSupport = true,
+            deprecatedSupport = true,
+            insertReplaceSupport = true,
+            insertTextModeSupport = {
+              valueSet = { 1, 2 }
+            },
+            labelDetailsSupport = true,
+            preselectSupport = true,
+            resolveSupport = {
+              properties = { "documentation", "additionalTextEdits", "insertTextFormat", "insertTextMode", "command" }
+            },
+            snippetSupport = true,
+            tagSupport = {
+              valueSet = { 1 }
+            }
+          },
+          completionList = {
+            itemDefaults = { "commitCharacters", "editRange", "insertTextFormat", "insertTextMode", "data" }
+          },
+          contextSupport = true,
+          dynamicRegistration = false,
+          insertTextMode = 1
+        }
+      }
+    }
+  - cmd: { "gopls" }
+  - filetypes: go, gomod, gowork, gotmpl
+  - root_dir: <function @/home/a3213/.local/share/nvim/lazy/nvim-lspconfig/lsp/gopls.lua:92>
+  - root_markers: { "go.mod", "go.work", ".git" }
+  - settings: {
+      gopls = {
+        analyses = {
+          unusedparams = true
+        },
+        gofumpt = true,
+        staticcheck = true
+      }
+    }
+
+- ⚠️ WARNING 'lua-language-server' is not executable. Configuration will not be used.
+- lua_ls:
+  - capabilities: {
+      textDocument = {
+        completion = {
+          completionItem = {
+            commitCharactersSupport = true,
+            deprecatedSupport = true,
+            insertReplaceSupport = true,
+            insertTextModeSupport = {
+              valueSet = { 1, 2 }
+            },
+            labelDetailsSupport = true,
+            preselectSupport = true,
+            resolveSupport = {
+              properties = { "documentation", "additionalTextEdits", "insertTextFormat", "insertTextMode", "command" }
+            },
+            snippetSupport = true,
+            tagSupport = {
+              valueSet = { 1 }
+            }
+          },
+          completionList = {
+            itemDefaults = { "commitCharacters", "editRange", "insertTextFormat", "insertTextMode", "data" }
+          },
+          contextSupport = true,
+          dynamicRegistration = false,
+          insertTextMode = 1
+        }
+      }
+    }
+  - cmd: { "lua-language-server" }
+  - filetypes: lua
+  - root_markers: { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" }
+  - settings: {
+      Lua = {
+        codeLens = {
+          enable = true
+        },
+        hint = {
+          enable = true,
+          semicolon = "Disable"
+        },
+        runtime = {
+          version = "LuaJIT"
+        },
+        workspace = {
+          checkThirdParty = false,
+          library = { "/tmp/.mount_nvimHloNHM/usr/share/nvim/runtime", "${3rd}/luv/library" }
+        }
+      }
+    }
+
+- ⚠️ WARNING Unknown filetype 'python3' (Hint: filename extension != filetype).
+- ⚠️ WARNING Unknown filetype 'pyc' (Hint: filename extension != filetype).
+- ⚠️ WARNING Unknown filetype 'pyd' (Hint: filename extension != filetype).
+- pyright:
+  - capabilities: {
+      textDocument = {
+        completion = {
+          completionItem = {
+            commitCharactersSupport = true,
+            deprecatedSupport = true,
+            insertReplaceSupport = true,
+            insertTextModeSupport = {
+              valueSet = { 1, 2 }
+            },
+            labelDetailsSupport = true,
+            preselectSupport = true,
+            resolveSupport = {
+              properties = { "documentation", "additionalTextEdits", "insertTextFormat", "insertTextMode", "command" }
+            },
+            snippetSupport = true,
+            tagSupport = {
+              valueSet = { 1 }
+            }
+          },
+          completionList = {
+            itemDefaults = { "commitCharacters", "editRange", "insertTextFormat", "insertTextMode", "data" }
+          },
+          contextSupport = true,
+          dynamicRegistration = false,
+          insertTextMode = 1
+        }
+      }
+    }
+  - cmd: { "python", "-m", "pyright" }
+  - filetypes: python, python3, pyc, pyd
+  - on_attach: <function @/home/a3213/.local/share/nvim/lazy/nvim-lspconfig/lsp/pyright.lua:47>
+  - root_markers: { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" }
+  - settings: {
+      pyright = {
+        analysis = {
+          diagnosticMode = "workspace"
+        }
+      },
+      python = {
+        analysis = {
+          autoSearchPaths = true,
+          diagnosticMode = "openFilesOnly",
+          useLibraryCodeForTypes = true
+        }
+      }
+    }
+
+
+vim.lsp: File Watcher ~
+- file watching "(workspace/didChangeWatchedFiles)" disabled on all clients
+
+vim.lsp: Position Encodings ~
+- No active clients
+
+==============================================================================
+vim.pack:                                                                   ✅
+
+vim.pack: basics ~
+- ✅ OK `vim.pack` is not used
+
+==============================================================================
+vim.provider:                                                             6 ⚠️
+
+Clipboard (optional) ~
+- ⚠️ WARNING No clipboard tool found. Clipboard registers (`"+` and `"*`) will not work.
+  - ADVICE:
+    - :help |clipboard|
+
+Node.js provider (optional) ~
+- Disabled (loaded_node_provider=0).
+
+Perl provider (optional) ~
+- ⚠️ WARNING "Neovim::Ext" cpan module is not installed
+  - ADVICE:
+    - See :help |provider-perl| for more information.
+    - You can disable this provider (and warning) by adding `let g:loaded_perl_provider = 0` to your init.vim
+- ⚠️ WARNING No usable perl executable found
+
+Python 3 provider (optional) ~
+- ⚠️ WARNING No Python executable found that can `import neovim`. Using the first available executable for diagnostics.
+- ⚠️ WARNING Could not load Python :
+  /usr/bin/python3 does not have the "neovim" module.
+  python3.14 not found in search path or not executable.
+  python3.13 not found in search path or not executable.
+  /usr/bin/python3.12 does not have the "neovim" module.
+  python3.11 not found in search path or not executable.
+  python3.10 not found in search path or not executable.
+  python3.9 not found in search path or not executable.
+  /home/a3213/.pixi/bin/python does not have the "neovim" module.
+  - ADVICE:
+    - See :help |provider-python| for more information.
+    - You can disable this provider (and warning) by adding `let g:loaded_python3_provider = 0` to your init.vim
+- Executable: Not found
+
+Python virtualenv ~
+- ✅ OK no $VIRTUAL_ENV
+
+Ruby provider (optional) ~
+- ⚠️ WARNING `ruby` and `gem` must be in $PATH.
+  - ADVICE:
+    - Install Ruby and verify that `ruby` and `gem` commands work.
+
+==============================================================================
+vim.treesitter:                                                             ✅
+
+Treesitter features ~
+- Treesitter ABI support: min 13, max 15
+- WASM parser support: false
+
+Treesitter parsers ~
+- ✅ OK Parser: c                         ABI: 15, path: /tmp/.mount_nvimHloNHM/usr/lib/nvim/parser/c.so
+- ✅ OK Parser: lua                       ABI: 15, path: /tmp/.mount_nvimHloNHM/usr/lib/nvim/parser/lua.so
+- ✅ OK Parser: markdown                  ABI: 15, path: /tmp/.mount_nvimHloNHM/usr/lib/nvim/parser/markdown.so
+- ✅ OK Parser: markdown_inline           ABI: 15, path: /tmp/.mount_nvimHloNHM/usr/lib/nvim/parser/markdown_inline.so
+- ✅ OK Parser: query                     ABI: 15, path: /tmp/.mount_nvimHloNHM/usr/lib/nvim/parser/query.so
+- ✅ OK Parser: vim                       ABI: 15, path: /tmp/.mount_nvimHloNHM/usr/lib/nvim/parser/vim.so
+- ✅ OK Parser: vimdoc                    ABI: 15, path: /tmp/.mount_nvimHloNHM/usr/lib/nvim/parser/vimdoc.so
+
+Treesitter queries ~
+- ✅ OK apex            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/apex
+- ✅ OK astro           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/astro
+- ✅ OK bash            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/bash
+- ✅ OK bibtex          textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/bibtex
+- ✅ OK c               folds           /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/c
+- ✅ OK c               highlights      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/c
+- ✅ OK c               injections      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/c
+- ✅ OK c               textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/c
+- ✅ OK c_sharp         textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/c_sharp
+- ✅ OK cmake           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/cmake
+- ✅ OK cpp             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/cpp
+- ✅ OK css             highlights      /home/a3213/.local/share/nvim/lazy/catppuccin/after/queries/css
+- ✅ OK css             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/css
+- ✅ OK cuda            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/cuda
+- ✅ OK dart            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/dart
+- ✅ OK dockerfile      textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/dockerfile
+- ✅ OK ecma            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/ecma
+- ✅ OK elixir          textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/elixir
+- ✅ OK elm             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/elm
+- ✅ OK enforce         textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/enforce
+- ✅ OK fennel          textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/fennel
+- ✅ OK fish            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/fish
+- ✅ OK foam            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/foam
+- ✅ OK gdscript        textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/gdscript
+- ✅ OK git_config      textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/git_config
+- ✅ OK gleam           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/gleam
+- ✅ OK glimmer         textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/glimmer
+- ✅ OK glsl            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/glsl
+- ✅ OK go              textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/go
+- ✅ OK hack            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/hack
+- ✅ OK haskell         textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/haskell
+- ✅ OK hcl             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/hcl
+- ✅ OK heex            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/heex
+- ✅ OK hlsl            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/hlsl
+- ✅ OK html            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/html
+- ✅ OK inko            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/inko
+- ✅ OK java            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/java
+- ✅ OK javascript      highlights      /home/a3213/.local/share/nvim/lazy/catppuccin/after/queries/javascript
+- ✅ OK javascript      textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/javascript
+- ✅ OK json            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/json
+- ✅ OK jsx             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/jsx
+- ✅ OK julia           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/julia
+- ✅ OK kotlin          textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/kotlin
+- ✅ OK latex           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/latex
+- ✅ OK lua             folds           /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/lua
+- ✅ OK lua             highlights      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/lua
+- ✅ OK lua             injections      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/lua
+- ✅ OK lua             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/lua
+- ✅ OK markdown        folds           /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/markdown
+- ✅ OK markdown        highlights      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/markdown
+- ✅ OK markdown        injections      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/markdown
+- ✅ OK markdown        textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/markdown
+- ✅ OK markdown_inline highlights      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/markdown_inline
+- ✅ OK markdown_inline injections      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/markdown_inline
+- ✅ OK matlab          textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/matlab
+- ✅ OK nasm            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/nasm
+- ✅ OK nim             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/nim
+- ✅ OK nix             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/nix
+- ✅ OK ocaml           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/ocaml
+- ✅ OK odin            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/odin
+- ✅ OK perl            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/perl
+- ✅ OK php             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/php
+- ✅ OK php_only        textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/php_only
+- ✅ OK python          textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/python
+- ✅ OK ql              textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/ql
+- ✅ OK query           folds           /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/query
+- ✅ OK query           highlights      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/query
+- ✅ OK query           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/query
+- ✅ OK r               textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/r
+- ✅ OK readline        textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/readline
+- ✅ OK rst             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/rst
+- ✅ OK ruby            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/ruby
+- ✅ OK rust            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/rust
+- ✅ OK scala           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/scala
+- ✅ OK scss            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/scss
+- ✅ OK slang           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/slang
+- ✅ OK supercollider   textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/supercollider
+- ✅ OK svelte          textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/svelte
+- ✅ OK swift           textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/swift
+- ✅ OK systemverilog   textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/systemverilog
+- ✅ OK tact            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/tact
+- ✅ OK terraform       textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/terraform
+- ✅ OK toml            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/toml
+- ✅ OK tsx             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/tsx
+- ✅ OK twig            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/twig
+- ✅ OK typescript      highlights      /home/a3213/.local/share/nvim/lazy/catppuccin/after/queries/typescript
+- ✅ OK typescript      textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/typescript
+- ✅ OK v               textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/v
+- ✅ OK vim             folds           /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/vim
+- ✅ OK vim             highlights      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/vim
+- ✅ OK vim             injections      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/vim
+- ✅ OK vim             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/vim
+- ✅ OK vimdoc          highlights      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/vimdoc
+- ✅ OK vimdoc          injections      /tmp/.mount_nvimHloNHM/usr/share/nvim/runtime/queries/vimdoc
+- ✅ OK vue             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/vue
+- ✅ OK wgsl            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/wgsl
+- ✅ OK wgsl_bevy       textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/wgsl_bevy
+- ✅ OK yaml            textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/yaml
+- ✅ OK zig             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/zig
+- ✅ OK zsh             textobjects     /home/a3213/.local/share/nvim/lazy/nvim-treesitter-textobjects/queries/zsh
+
