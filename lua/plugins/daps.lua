@@ -43,13 +43,6 @@ return {
       })
 
       dap.defaults.fallback.terminal_win_cmd = "belowright 15split new"
-      dap.listeners.after.event_output["dap_repl_output"] = function(_, body)
-        if body and body.output then
-          vim.schedule(function()
-            require("dap.repl").append(body.output)
-          end)
-        end
-      end
 
       -- 自动打开/关闭 UI
       dap.listeners.after.event_initialized["dapui_config"] = function()
@@ -94,14 +87,16 @@ return {
           name = "Debug",
           request = "launch",
           program = "${file}",
-          console = "integratedTerminal",
+          console = "internalConsole",
+          outputMode = "remote",
         },
         {
           type = "go",
           name = "Debug Package",
           request = "launch",
           program = "${fileDirname}",
-          console = "integratedTerminal",
+          console = "internalConsole",
+          outputMode = "remote",
         },
       }
 
