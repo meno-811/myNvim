@@ -16,10 +16,40 @@ return {
       -- =========================
       --  基础 UI
       -- =========================
-      require("dapui").setup()
+      dapui.setup({
+        layouts = {
+          {
+            elements = {
+              { id = "scopes", size = 0.25 },
+              "breakpoints",
+              "stacks",
+              "watches",
+            },
+            size = 40,
+            position = "left",
+          },
+          {
+            elements = {
+              "console",
+              "repl",
+            },
+            size = 10,
+            position = "bottom",
+          },
+        },
+      })
       require("nvim-dap-virtual-text").setup({
         commented = true, -- 在注释中显示虚拟文本
       })
+
+      dap.defaults.fallback.terminal_win_cmd = "belowright 15split new"
+      dap.listeners.after.event_output["dap_repl_output"] = function(_, body)
+        if body and body.output then
+          vim.schedule(function()
+            require("dap.repl").append(body.output)
+          end)
+        end
+      end
 
       -- 自动打开/关闭 UI
       dap.listeners.after.event_initialized["dapui_config"] = function()
@@ -64,12 +94,14 @@ return {
           name = "Debug",
           request = "launch",
           program = "${file}",
+          console = "integratedTerminal",
         },
         {
           type = "go",
           name = "Debug Package",
           request = "launch",
           program = "${fileDirname}",
+          console = "integratedTerminal",
         },
       }
 
@@ -88,6 +120,7 @@ return {
           request = "launch",
           name = "Launch file",
           program = "${file}",
+          console = "integratedTerminal",
         },
       }
 
