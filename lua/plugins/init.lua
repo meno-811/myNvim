@@ -17,9 +17,9 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+  { import = "plugins.ai_avante" },-- 智能体插件
   { import = "plugins.astrocore" },-- AstroCore 插件
   { import = "plugins.code_completion" },-- 代码补全
-  { import = "plugins.codecompanion" },-- 使用 CodeCompanion 插件进行ai代码补全
   { import = "plugins.daps" },-- 调试器插件
   { import = "plugins.git" },-- Git 相关的插件
   { import = "plugins.lsp" },-- LSP

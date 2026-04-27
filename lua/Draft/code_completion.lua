@@ -32,6 +32,7 @@ return {
         mapping = cmp.mapping.preset.insert({
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),             -- Ctrl+B 向上滚动补全文档（浮动窗口）
           ['<C-f>'] = cmp.mapping.scroll_docs(4),             -- Ctrl+F 向下滚动补全文档（浮动窗口）
+          -- ['<C-Space>'] = cmp.mapping.complete(),          -- Ctrl+Space 手动触发补全
           ['<C-e>'] = cmp.mapping.abort(),                  -- Ctrl+E 关闭补全菜单
           ['<CR>'] = cmp.mapping.confirm({select = true }),  -- 回车键确认补全
         -- tab 键切换补全项
@@ -40,25 +41,33 @@ return {
             elseif luasnip.expand_or_jumpable() then luasnip.expand_or_jump()    -- 如果光标在片段占位符上 → 展开/跳到下一占位符
             else fallback() end          -- 否则 → 执行默认 Tab 行为（输入制表符）
           end, { 'i', 's' }),           -- 在插入模式（i）和选择模式（s）下生效
-          ['<Up>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.close()
-            end
-            fallback()
-          end, { 'i', 's' }),
-          ['<Down>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.close()
-            end
-            fallback()
-          end, { 'i', 's' }),
-          -- ['<Esc>'] = cmp.mapping(function(fallback)
+
+          -- -- ========== Tab 智能补全行为 ==========
+          -- ['<Tab>'] = cmp.mapping(function(fallback)
           --   if cmp.visible() then
-          --     cmp.abort()
+          --     -- 补全菜单打开 → 选择下一项
+          --     cmp.select_next_item()
+          --   elseif luasnip.expand_or_jumpable() then
+          --     -- snippet 可展开或可跳转 → 展开或跳转
+          --     luasnip.expand_or_jump()
+          --   else
+          --     -- 否则执行默认 Tab（插入 Tab 或缩进）
+          --     fallback()
+          --   end
+          -- end, { 'i', 's' }),
+          -- -- Shift-Tab：选择上一项
+          -- ['<S-Tab>'] = cmp.mapping(function(fallback)
+          --   if cmp.visible() then
+          --     cmp.select_prev_item()
+          --   elseif luasnip.jumpable(-1) then
+          --     luasnip.jump(-1)
           --   else
           --     fallback()
           --   end
           -- end, { 'i', 's' }),
+          -- -- ========== 方向键选择补全项 ==========
+          -- ['<Down>'] = cmp.mapping.select_next_item(),
+          -- ['<Up>'] = cmp.mapping.select_prev_item(),
         }),
         -- 优先级：LSP -> LuaSnip -> Buffer -> Path
         sources = cmp.config.sources({
@@ -95,8 +104,8 @@ return {
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
 
           -- 上下方向键：选择候选项（zsh 风格）
-          ["<Down>"] = cmp.mapping.select_next_item(),
-          ["<Up>"] = cmp.mapping.select_prev_item(),
+          -- ["<Down>"] = cmp.mapping.select_next_item(),
+          -- ["<Up>"] = cmp.mapping.select_prev_item(),
         },
 
         sources = {

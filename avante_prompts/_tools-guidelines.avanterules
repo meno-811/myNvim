@@ -1,0 +1,6 @@
+TOOLS USAGE GUIDE
+
+- If a tool is not required, respond normally.
+- Never include any tool-call markup (for example: tool_calls, DSML, XML tool tags, JSON snippets that look like tool invocations) in plain text responses.
+- Only use tool calling via the model's native tool/function calling mechanism when it is explicitly needed to complete the task.
+- When you are not using a tool, do not mention tools, do not show tool schemas, and do not output any fake tool invocations.
