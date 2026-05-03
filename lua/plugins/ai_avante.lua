@@ -5,62 +5,86 @@
 -- 3) 显式绑定最常用按键，并在注释中说明功能
 
 return {
-  {
-    "yetone/avante.nvim",
-    event = "VeryLazy",
-    version = false,
-    build = vim.fn.has("win32") ~= 0
-        and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
-        or "make",
-
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-
-      -- 可选：让 Avante 的输出以更好的 Markdown 形式渲染（不装也能用，只是显示效果差一些）
-      {
-        "MeanderingProgrammer/render-markdown.nvim",
-        ft = { "markdown", "Avante" },
-        opts = { file_types = { "markdown", "Avante" } },
-      },
-    },
-
-    opts = {
-      override_prompt_dir = vim.fn.expand("~/.config/nvim/avante_prompts"),
-      behaviour = {
-        auto_set_keymaps = false, -- 关闭插件默认键位，避免和你下面自定义的键位冲突
-        auto_add_current_file = false,  -- 关闭每次打开文件时自动添加到 Avante 会话的功能
-      },
-      provider = "deepseek",
-      auto_suggestions_provider = "deepseek",
-      providers = {
-        deepseek = {
-          __inherited_from = "openai",
-          endpoint = "https://api.deepseek.com",
-          model = "deepseek-v4-flash",
-          api_key_name = "DEEPSEEK_API_KEY",
+{
+  "yetone/avante.nvim",
+  -- 如果您想从源代码构建，请执行 `make BUILD_FROM_SOURCE=true`
+  -- ⚠️ 一定要加上这一行配置！！！！！
+  build = vim.fn.has("win32") ~= 0
+      and "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false"
+      or "make",
+  event = "VeryLazy",
+  version = false, -- 永远不要将此值设置为 "*"！永远不要！
+  ---@module 'avante'
+  ---@type avante.Config
+  opts = {
+    -- 在此处添加任何选项
+    -- 例如
+    provider = "deepseek",
+    providers = {
+      claude = {
+        endpoint = "https://api.anthropic.com",
+        model = "claude-sonnet-4-20250514",
+        timeout = 30000, -- Timeout in milliseconds
           extra_request_body = {
-            thinking = { type = "disabled" },
-          }
-        }
-      }
-    },
-
-    keys = {
-      -- <leader>aa：提问（普通/可视模式都可用；可视模式会把选区作为上下文）
-      { "<leader>aa", "<Plug>(AvanteAsk)", mode = { "n", "v" }, desc = "Avante: Ask" },
-
-      -- 可视模式 <leader>ae：对选区发起“可应用编辑”（生成补丁并可一键应用）
-      { "<leader>ae", "<Plug>(AvanteEdit)", mode = "v", desc = "Avante: Edit selection" },
-
-      -- <leader>ar：刷新当前 Avante 面板/会话显示
-      { "<leader>ar", "<Plug>(AvanteRefresh)", mode = "n", desc = "Avante: Refresh" },
-
-      -- <leader>as：开关 Avante 自动建议功能
-      { "<leader>as", "<Plug>(AvanteToggleSuggestion)", mode = "n", desc = "Avante: Toggle AI suggestions" },
-
-      -- <leader>at：开关 Avante 侧边栏
-      { "<leader>at", "<Plug>(AvanteToggle)", mode = "n", desc = "Avante: Toggle sidebar" },
+            temperature = 0.75,
+            max_tokens = 20480,
+          },
+      },
+      deepseek = {
+      __inherited_from = "openai",
+      endpoint = "https://api.deepseek.com",
+      model = "deepseek-v4-flash",
+      api_key_name = "DEEPSEEK_API_KEY",
+      extra_request_body = {
+        thinking = { type = "disabled" },
+        },
+      },
+      moonshot = {
+        endpoint = "https://api.moonshot.ai/v1",
+        model = "kimi-k2-0711-preview",
+        timeout = 30000, -- 超时时间（毫秒）
+          extra_request_body = {
+            temperature = 0.75,
+            max_tokens = 32768,
+          },
+      },
     },
   },
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+    "MunifTanjim/nui.nvim",
+    --- 以下依赖项是可选的，
+    "echasnovski/mini.pick", -- 用于文件选择器提供者 mini.pick
+    "nvim-telescope/telescope.nvim", -- 用于文件选择器提供者 telescope
+    "hrsh7th/nvim-cmp", -- avante 命令和提及的自动完成
+    "ibhagwan/fzf-lua", -- 用于文件选择器提供者 fzf
+    "nvim-tree/nvim-web-devicons", -- 或 echasnovski/mini.icons
+    -- "zbirenbaum/copilot.lua", -- 用于 providers='copilot'
+    {
+      -- 支持图像粘贴
+      "HakonHarnes/img-clip.nvim",
+      event = "VeryLazy",
+      opts = {
+        -- 推荐设置
+        default = {
+          embed_image_as_base64 = false,
+          prompt_for_file_name = false,
+          drag_and_drop = {
+            insert_mode = true,
+          },
+          -- Windows 用户必需
+          use_absolute_path = true,
+        },
+      },
+    },
+    {
+      -- 如果您有 lazy=true，请确保正确设置
+      'MeanderingProgrammer/render-markdown.nvim',
+      opts = {
+        file_types = { "markdown", "Avante" },
+      },
+      ft = { "markdown", "Avante" },
+    },
+  },
+}
 }
