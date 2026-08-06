@@ -15,6 +15,15 @@ return {
         local astro = require "astrocore"
         local maps = astro.empty_map_table()
 
+        local function close_current_view()
+            if vim.bo.buftype == "quickfix" then
+                local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+                vim.cmd(wininfo and wininfo.loclist == 1 and "lclose" or "cclose")
+            else
+                require("mini.bufremove").delete(0, false)
+            end
+        end
+
         -- Split navigation
         maps.n["<C-Left>"] = { "<C-w>h", desc = "Move to left split" }
         maps.n["<C-Down>"] = { "<C-w>j", desc = "Move to below split" }
@@ -27,8 +36,8 @@ return {
         maps.n["<Tab>"] = { "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" }
         maps.n["<S-Tab>"] = { "<Cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" }
         maps.n["<Leader>q"] = {
-            function() require("mini.bufremove").delete(0, false) end,
-            desc = "Close current buffer",
+            close_current_view,
+            desc = "Close current view",
         }
         for index = 1, 9 do
             maps.n["<Leader>" .. index] = {
@@ -85,10 +94,6 @@ return {
             signs = true,
             underline = true,
             severity_sort = true,
-        }
-
-        opts.features = {
-            diagnostics = { virtual_text = true, virtual_lines = false },
         }
 
         opts.autocmds = {

@@ -30,7 +30,8 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.l
 这是当前项目的核心入口，包含：
 
 - 窗口移动与窗口大小调整快捷键。
-- Bufferline 切换、按编号跳转和安全关闭 buffer 的快捷键。
+- Bufferline 切换、按编号跳转和按当前内容类型关闭的快捷键。
+- `:q`/`:quit` 保留 Neovim 原生命令语义。
 - 插入模式左右方向键跨行移动逻辑。
 - 行号、缩进、搜索、剪贴板、鼠标、滚动边距等基础选项。
 - 代码文件关闭自动换行、文本文件开启友好换行的 FileType 自动命令。
@@ -65,7 +66,7 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.l
 ### 其他插件文件
 
 - `code_completion.lua`：nvim-cmp、LuaSnip 和命令行补全。
-- `none_ls.lua`：外部格式化器和 flake8 诊断桥接。
+- `none_ls.lua`：外部格式化器桥接。
 - `daps.lua`：Go/Python 调试器及 DAP UI。
 - `neo_tree.lua`：文件树及其内部操作。
 - `git.lua`：Git 相关插件。
@@ -84,7 +85,7 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.l
 | `set_up.lua` 中的 FileType autocmd | `opts.autocmds` | 自动命令集中且自带 augroup 管理 |
 | 手写诊断全局配置 | `opts.diagnostics` | AstroCore 原生支持 `vim.diagnostic.config()` 参数 |
 | 插入模式诊断切换 autocmd | `opts.autocmds.diagnostics_by_mode` | 仍需事件驱动，但由 AstroCore 注册 |
-| 手写 buffer 关闭与空 buffer 清理 | `mini.bufremove.delete()` | 使用 AstroCore 兼容的专用模块并保持窗口布局 |
+| 手写 buffer 关闭 | `mini.bufremove.delete()` | 使用 AstroCore 兼容的专用模块并保持窗口布局 |
 | 旧版 Treesitter 模块配置 | `opts.treesitter` | AstroCore 已适配 Treesitter main 新 API |
 | 分散的普通快捷键 | `opts.mappings` | 统一描述、规范化键名并可执行冲突健康检查 |
 
@@ -105,17 +106,14 @@ AstroCore 本身也是对这些 API 的组织层，而不是替代 Neovim API �
 
 独立安装 AstroCore 时，它不会像完整 AstroNvim 那样初始化 `vim.t.bufs` buffer 跟踪列表，因此不能直接调用依赖该列表的 `astrocore.buffer.close()`。项目使用 AstroCore 明确兼容的 `mini.bufremove` 模块安全删除 buffer；快捷键仍由 AstroCore 管理。这样既避免维护大段自定义关闭逻辑，也不会破坏窗口布局。
 
-## 后续仍值得整理的项目
+`Space+Q` 在普通文件中使用 `mini.bufremove` 安全删除 buffer；在 quickfix 或 location-list 结果窗口中关闭对应窗口。Bufferline 的鼠标叉号同样使用 `mini.bufremove`。`:q`/`:quit` 保留 Neovim 原义：关闭当前窗口，关闭最后一个窗口时退出 Neovim。Neo-tree 即使成为最后一个窗口也不会主动关闭 Neovim。
 
-这次迁移不顺带改变其他插件行为。后续可以独立处理：
+## 已完成的精简
 
-1. Go 同时由 gopls 和 none-ls/goimports 提供格式化的问题。
-2. Mason 安装了 Prettier、eslint_d，但 none-ls 没有启用它们的问题。
-3. `cmp-path` 在依赖列表中重复声明的问题。
-4. LazyGit、Neogit、Fugitive 等 Git 前端是否都需要保留。
-5. Avante 同时安装多个可选文件选择器是否必要。
-
-每一项都应单独修改和验证，避免在架构迁移时同时改变编辑体验。
+- Go 仅由 gopls 提供格式化，避免与 none-ls/goimports 重复。
+- Git 主界面只保留 LazyGit；gitsigns 和 git-conflict 分别负责行级提示与冲突处理。
+- Avante 使用内建选择器，不再额外安装多套可选选择器。
+- Python 使用 Pyright 诊断和 Black 格式化，不再维护自定义 flake8 适配器。
 
 ## 常用检查命令
 

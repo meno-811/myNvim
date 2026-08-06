@@ -5,9 +5,7 @@ return {
   {
     "williamboman/mason.nvim",
     config = function()
-      require("mason").setup({
-        registries = { "github:mason-org/mason-registry" },
-      })
+      require("mason").setup()
     end,
   },
 
@@ -88,9 +86,6 @@ return {
       -- ========== Go ==========
       -- 关键修正：semanticTokens 直接放在 gopls 下，不是 ui.semanticTokens
       vim.lsp.config("gopls", {
-        cmd = { "gopls" },
-        filetypes = { "go", "gomod", "gowork", "gotmpl" },
-        root_markers = { "go.mod", "go.work", ".git" },
         capabilities = capabilities,
         settings = {
           gopls = {
@@ -104,13 +99,9 @@ return {
           },
         },
       })
-      vim.lsp.enable("gopls")
 
       -- ========== Python ==========
       vim.lsp.config("pyright", {
-        cmd = { "pyright-langserver", "--stdio" },
-        filetypes = { "python" },
-        root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
         capabilities = capabilities,
         settings = {
           python = {
@@ -120,13 +111,9 @@ return {
           },
         },
       })
-      vim.lsp.enable("pyright")
 
       -- ========== Lua ==========
       vim.lsp.config("lua_ls", {
-        cmd = { "lua-language-server" },
-        filetypes = { "lua" },
-        root_markers = { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", ".git" },
         capabilities = capabilities,
         settings = {
           Lua = {
@@ -141,7 +128,6 @@ return {
           },
         },
       })
-      vim.lsp.enable("lua_ls")
     end,
   },
 }

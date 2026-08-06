@@ -63,7 +63,7 @@ return {
 
     return {
       enable_git_status = git_available, -- 是否启用 git 状态
-      close_if_last_window = true, -- 如果是最后一个窗口则关闭 neo-tree
+      close_if_last_window = false, -- Neo-tree 成为最后窗口时保持 Neovim 运行
       auto_clean_after_session_restore = true, -- 会话恢复后自动清理
 
       -- 实际启用的 sources 列表（根据 git 可用性切换）
@@ -79,34 +79,6 @@ return {
         -- 使用 Neovim 的 UI 打开文件（跨平台）
         system_open = function(state)
           vim.ui.open(state.tree:get_node():get_id())
-        end,
-
-        -- 如果有子节点且已展开则折叠，否则聚焦父节点
-        parent_or_close = function(state)
-          local node = state.tree:get_node()
-          if node:has_children() and node:is_expanded() then
-            state.commands.toggle_node(state)
-          else
-            require("neo-tree.ui.renderer").focus_node(state, node:get_parent_id())
-          end
-        end,
-
-        -- 如果有子节点则展开或聚焦第一个子节点；否则打开文件
-        child_or_open = function(state)
-          local node = state.tree:get_node()
-          if node:has_children() then
-            if not node:is_expanded() then
-              state.commands.toggle_node(state)
-            else
-              if node.type == "file" then
-                state.commands.open(state)
-              else
-                require("neo-tree.ui.renderer").focus_node(state, node:get_child_ids()[1])
-              end
-            end
-          else
-            state.commands.open(state)
-          end
         end,
 
         -- 复制路径/文件名等多种格式到系统剪贴板
@@ -165,8 +137,6 @@ return {
           ["]b"] = "next_source", -- 切换到下一个 source
           ["O"] = "system_open", -- 大写 O 也打开系统打开
           ["Y"] = "copy_selector", -- Y 调出复制选择器
-          ["h"] = "parent_or_close", -- h 折叠或聚焦父节点
-          ["l"] = "child_or_open", -- l 展开或打开子节点/文件
         },
         fuzzy_finder_mappings = {
           ["<C-J>"] = "move_cursor_down", -- 模糊查找中向下移动

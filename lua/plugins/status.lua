@@ -37,6 +37,14 @@ return{
     
                     -- 是否总是显示 tabline
                     always_show_bufferline = true,
+
+                    -- 鼠标叉号和右键统一使用安全 buffer 删除，保留窗口布局。
+                    close_command = function(bufnr)
+                        require("mini.bufremove").delete(bufnr, false)
+                    end,
+                    right_mouse_command = function(bufnr)
+                        require("mini.bufremove").delete(bufnr, false)
+                    end,
                 },
   
                 -- 自定义颜色（可选，适配你的主题）

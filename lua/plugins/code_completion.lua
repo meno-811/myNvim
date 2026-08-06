@@ -11,18 +11,19 @@ return {
       "hrsh7th/cmp-nvim-lsp",       -- 桥接插件：让 nvim-cmp 能从 LSP（语言服务器）获取补全建议
       "hrsh7th/cmp-buffer",         -- 数据源：从当前打开的文件（缓冲区）中提取已有单词作为补全项
       "hrsh7th/cmp-path",           -- 数据源：补全文件系统路径（如输入 ./ 或 /usr/ 时提示目录内容）
-      "L3MON4D3/LuaSnip",           -- 代码片段引擎：支持自定义/预定义的代码模板（如 for 循环、函数模板）
-      "saadparwaiz1/cmp_luasnip",   -- 桥接插件：让 nvim-cmp 能把 LuaSnip 的片段当作补全项显示
+      "L3MON4D3/LuaSnip",           -- 代码片段引擎：展开 LSP 补全项中的代码片段
       "hrsh7th/cmp-cmdline",           -- 命令行补全插件：在命令行模式下补全命令
-      "hrsh7th/cmp-path",     -- 路径补全（命令行模式常用）
     },
     config = function()
       local cmp = require("cmp")
       local luasnip = require("luasnip")
       
-      require("luasnip.loaders.from_vscode").lazy_load()  -- 加载 VSCode 格式的片段集合
       -- ========== Insert 模式配置 nvim-cmp ==========
       cmp.setup({
+        preselect = cmp.PreselectMode.None,
+        completion = {
+          completeopt = "menu,menuone,noinsert,noselect",
+        },
         snippet = {
           expand = function(args)
             luasnip.lsp_expand(args.body)
@@ -33,25 +34,20 @@ return {
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),             -- Ctrl+B 向上滚动补全文档（浮动窗口）
           ['<C-f>'] = cmp.mapping.scroll_docs(4),             -- Ctrl+F 向下滚动补全文档（浮动窗口）
           ['<C-e>'] = cmp.mapping.abort(),                  -- Ctrl+E 关闭补全菜单
-          ['<CR>'] = cmp.mapping.confirm({select = true }),  -- 回车键确认补全
-        -- tab 键切换补全项
+          ['<CR>'] = cmp.mapping(function(fallback)
+            if cmp.visible() and cmp.get_selected_entry() then
+              cmp.confirm({ select = false })
+            else
+              fallback()
+            end
+          end, { 'i', 's' }), -- 仅确认手动选择的候选项，否则正常换行
+          -- Tab 仅用于代码片段占位符跳转，不参与补全项选择
           ['<Tab>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then cmp.select_next_item()    -- 如果补全菜单显示中 → 选择补全菜单中的下一项
-            elseif luasnip.expand_or_jumpable() then luasnip.expand_or_jump()    -- 如果光标在片段占位符上 → 展开/跳到下一占位符
+            if luasnip.expand_or_jumpable() then luasnip.expand_or_jump()
             else fallback() end          -- 否则 → 执行默认 Tab 行为（输入制表符）
           end, { 'i', 's' }),           -- 在插入模式（i）和选择模式（s）下生效
-          ['<Up>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.close()
-            end
-            fallback()
-          end, { 'i', 's' }),
-          ['<Down>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.close()
-            end
-            fallback()
-          end, { 'i', 's' }),
+          ['<Up>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+          ['<Down>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
           -- ['<Esc>'] = cmp.mapping(function(fallback)
           --   if cmp.visible() then
           --     cmp.abort()
@@ -60,10 +56,9 @@ return {
           --   end
           -- end, { 'i', 's' }),
         }),
-        -- 优先级：LSP -> LuaSnip -> Buffer -> Path
+        -- 优先级：LSP -> Buffer -> Path
         sources = cmp.config.sources({
           { name = 'nvim_lsp' },
-          { name = 'luasnip' },
         }, {
           { name = 'buffer' },
           { name = 'path' },
