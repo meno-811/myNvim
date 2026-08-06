@@ -35,6 +35,13 @@ return {
         maps.n["<C-L>"] = { "<Cmd>vertical resize +2<CR>", desc = "Resize split right" }
         maps.n["<Tab>"] = { "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" }
         maps.n["<S-Tab>"] = { "<Cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" }
+        maps.n["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }
+        maps.i["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }
+        maps.x["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }
+        maps.n["<C-z>"] = { "<Cmd>undo<CR>", desc = "Undo" }
+        maps.i["<C-z>"] = { "<Cmd>undo<CR>", desc = "Undo" }
+        maps.n["<C-S-z>"] = { "<Cmd>redo<CR>", desc = "Redo" }
+        maps.i["<C-S-z>"] = { "<Cmd>redo<CR>", desc = "Redo" }
         maps.n["<Leader>q"] = {
             close_current_view,
             desc = "Close current view",
