@@ -13,6 +13,7 @@ opt.cursorline = true       -- 高亮当前行
 opt.signcolumn = "yes"      -- 显示符号列，用于显示诊断图标或者git状态
 opt.termguicolors = true    -- 启用真彩色支持
 opt.scrolloff = 8           -- 滚动时保留8行上下文
+opt.updatetime = 300        -- 光标停留 300ms 后触发引用高亮等事件
 api.nvim_create_autocmd("FileType", {       -- 文件类型如果是代码类型，关闭自动换行
     pattern = { "lua", "python", "javascript", "go", "rust" },
     callback = function()

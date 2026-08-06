@@ -9,6 +9,23 @@ vim.diagnostic.config({
   severity_sort = true,
 })
 
+-- 插入模式只保留诊断下划线，离开插入模式后再显示行尾错误原因。
+local diagnostic_display_group = vim.api.nvim_create_augroup("DiagnosticDisplayByMode", { clear = true })
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+  group = diagnostic_display_group,
+  callback = function()
+    vim.diagnostic.config({ virtual_text = false })
+  end,
+})
+
+vim.api.nvim_create_autocmd("InsertLeave", {
+  group = diagnostic_display_group,
+  callback = function()
+    vim.diagnostic.config({ virtual_text = true })
+  end,
+})
+
 return {
   {
     "williamboman/mason.nvim",
@@ -61,6 +78,35 @@ return {
           map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
           map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
           -- map("n", "<leader>e", vim.diagnostic.open_float, "Line Diagnostic")
+
+          -- 光标停在符号上时，高亮当前符号及文档内的其他引用。
+          if client:supports_method("textDocument/documentHighlight") then
+            local highlight_group = vim.api.nvim_create_augroup("LspDocumentHighlight_" .. bufnr, { clear = true })
+
+            vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+              group = highlight_group,
+              buffer = bufnr,
+              callback = vim.lsp.buf.document_highlight,
+            })
+
+            vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+              group = highlight_group,
+              buffer = bufnr,
+              callback = vim.lsp.buf.clear_references,
+            })
+
+            vim.api.nvim_create_autocmd("LspDetach", {
+              group = highlight_group,
+              buffer = bufnr,
+              callback = function(detach_args)
+                vim.lsp.buf.clear_references()
+                vim.api.nvim_clear_autocmds({
+                  group = highlight_group,
+                  buffer = detach_args.buf,
+                })
+              end,
+            })
+          end
         end,
       })
 
