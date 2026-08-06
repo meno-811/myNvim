@@ -6,12 +6,23 @@
 -- 构造一个标准的安装路径
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 -- 如果插件不存在，就用git克隆它
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    "git", "clone", "--filter=blob:none",
+if not vim.uv.fs_stat(lazypath) then
+  local output = vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "--branch=stable",
     "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable", lazypath,
+    lazypath,
   })
+
+  if vim.v.shell_error ~= 0 then
+    error(
+      "lazy.nvim 下载失败：\n"
+        .. output
+        .. "\n请检查 Git、GitHub 网络或代理设置。"
+    )
+  end
 end
 -- 把插件路径../lazy/lazy.nvim添加到运行时路径，一般是/home/a3213/.local/share/nvim/data/lazy/lazy.nvim
 vim.opt.rtp:prepend(lazypath)
