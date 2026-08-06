@@ -1,31 +1,6 @@
 -- lsp.lua
 -- Neovim 0.12+ 原生 LSP 配置
 
-vim.diagnostic.config({
-  update_in_insert = true,
-  virtual_text = true,
-  signs = true,
-  underline = true,
-  severity_sort = true,
-})
-
--- 插入模式只保留诊断下划线，离开插入模式后再显示行尾错误原因。
-local diagnostic_display_group = vim.api.nvim_create_augroup("DiagnosticDisplayByMode", { clear = true })
-
-vim.api.nvim_create_autocmd("InsertEnter", {
-  group = diagnostic_display_group,
-  callback = function()
-    vim.diagnostic.config({ virtual_text = false })
-  end,
-})
-
-vim.api.nvim_create_autocmd("InsertLeave", {
-  group = diagnostic_display_group,
-  callback = function()
-    vim.diagnostic.config({ virtual_text = true })
-  end,
-})
-
 return {
   {
     "williamboman/mason.nvim",
