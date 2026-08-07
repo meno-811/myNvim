@@ -112,6 +112,19 @@ return {
         },
       })
 
+      -- ========== Rust ==========
+      vim.lsp.config("rust_analyzer", {
+        capabilities = capabilities,
+        settings = {
+          ["rust-analyzer"] = {
+            completion = {
+              -- 补全函数时只添加括号，不自动生成并选中参数名占位符。
+              callable = { snippets = "add_parentheses" },
+            },
+          },
+        },
+      })
+
       -- ========== Lua ==========
       vim.lsp.config("lua_ls", {
         capabilities = capabilities,

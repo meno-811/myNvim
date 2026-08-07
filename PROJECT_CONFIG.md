@@ -73,7 +73,7 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.l
 - `status.lua`：lualine 和 bufferline 的外观设置。
 - `term.lua`：ToggleTerm。
 - `subject_skin.lua`：Catppuccin 主题。
-- `ai_avante.lua`：Avante AI 配置。
+- `ai_claudecode.lua`：Claude Code IDE 集成。
 
 插件内部快捷键可以继续留在插件 spec 的 `keys` 或 `config` 中。例如 Neo-tree 的 `<Leader>e` 同时承担延迟加载触发器，如果强行移入 AstroCore，反而会破坏 lazy.nvim 的按需加载语义。
 
@@ -112,7 +112,7 @@ AstroCore 本身也是对这些 API 的组织层，而不是替代 Neovim API �
 
 - Go 仅由 gopls 提供格式化，避免与 none-ls/goimports 重复。
 - Git 主界面只保留 LazyGit；gitsigns 和 git-conflict 分别负责行级提示与冲突处理。
-- Avante 使用内建选择器，不再额外安装多套可选选择器。
+- Claude Code 通过 `claudecode.nvim` 提供终端、上下文发送和 diff 审阅。
 - Python 使用 Pyright 诊断和 Black 格式化，不再维护自定义 flake8 适配器。
 
 ## 常用检查命令
