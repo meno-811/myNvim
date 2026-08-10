@@ -27,6 +27,20 @@ end
 -- 把插件路径../lazy/lazy.nvim添加到运行时路径，一般是/home/a3213/.local/share/nvim/data/lazy/lazy.nvim
 vim.opt.rtp:prepend(lazypath)
 
+vim.api.nvim_create_user_command("MessagesBuffer", function()
+    vim.cmd("new")
+    vim.bo.buftype = "nofile"
+    vim.bo.bufhidden = "wipe"
+    vim.bo.swapfile = false
+    vim.api.nvim_buf_set_lines(
+        0,
+        0,
+        -1,
+        false,
+        vim.split(vim.fn.execute("messages"), "\n")
+    )
+end, {})
+
 require("lazy").setup({
   { import = "plugins.ai_claudecode" },-- Claude Code IDE 集成
   { import = "plugins.ai_copilot" },-- GitHub Copilot 官方插件
