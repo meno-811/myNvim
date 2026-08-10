@@ -27,20 +27,79 @@ end
 -- 把插件路径../lazy/lazy.nvim添加到运行时路径，一般是/home/a3213/.local/share/nvim/data/lazy/lazy.nvim
 vim.opt.rtp:prepend(lazypath)
 
-vim.api.nvim_create_user_command("MessagesBuffer", function()
-    vim.cmd("new")
-    vim.bo.buftype = "nofile"
-    vim.bo.bufhidden = "wipe"
-    vim.bo.swapfile = false
-    vim.api.nvim_buf_set_lines(
-        0,
-        0,
-        -1,
-        false,
-        vim.split(vim.fn.execute("messages"), "\n")
-    )
-end, {})
+local messages_win = nil
 
+vim.api.nvim_create_user_command("MessagesBuffer", function()
+    -- 再次执行命令时关闭窗口
+    if messages_win and vim.api.nvim_win_is_valid(messages_win) then
+        vim.api.nvim_win_close(messages_win, true)
+        messages_win = nil
+        return
+    end
+
+    local messages = vim.fn.execute("messages")
+    local lines = vim.split(messages, "\n", { plain = true })
+
+    local buf = vim.api.nvim_create_buf(false, true)
+
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+
+    vim.api.nvim_set_option_value("modifiable", false, {
+        buf = buf,
+    })
+
+    vim.api.nvim_set_option_value("bufhidden", "wipe", {
+        buf = buf,
+    })
+
+    local width = math.max(1, vim.o.columns - 4)
+    local max_height = math.max(5, math.floor(vim.o.lines * 0.35))
+    local height = math.min(math.max(#lines, 5), max_height)
+
+    messages_win = vim.api.nvim_open_win(buf, true, {
+        relative = "editor",
+        row = 1,
+        col = 2,
+        width = width,
+        height = height,
+        style = "minimal",
+        border = "rounded",
+        title = " Messages ",
+        title_pos = "center",
+        zindex = 60,
+    })
+
+    vim.api.nvim_set_option_value("wrap", false, {
+        win = messages_win,
+    })
+
+    -- 默认定位到最新消息
+    vim.api.nvim_win_set_cursor(
+        messages_win,
+        { math.max(#lines, 1), 0 }
+    )
+
+    local close = function()
+        if messages_win and vim.api.nvim_win_is_valid(messages_win) then
+            vim.api.nvim_win_close(messages_win, true)
+        end
+        messages_win = nil
+    end
+
+    vim.keymap.set("n", "q", close, {
+        buffer = buf,
+        silent = true,
+        desc = "关闭消息窗口",
+    })
+
+    vim.keymap.set("n", "<Esc>", close, {
+        buffer = buf,
+        silent = true,
+        desc = "关闭消息窗口",
+    })
+end, {
+    desc = "在顶部浮动窗口中显示消息记录",
+})
 require("lazy").setup({
   { import = "plugins.ai_claudecode" },-- Claude Code IDE 集成
   { import = "plugins.ai_copilot" },-- GitHub Copilot 官方插件
