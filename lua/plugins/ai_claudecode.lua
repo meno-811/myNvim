@@ -6,6 +6,7 @@ return {
     opts = {
       terminal = {
         git_repo_cwd = true,
+        auto_insert = false,
         snacks_win_opts = {
           keys = {
             claude_win_left = {
