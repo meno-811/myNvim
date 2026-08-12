@@ -59,13 +59,29 @@ return {
             vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
               group = highlight_group,
               buffer = bufnr,
-              callback = vim.lsp.buf.document_highlight,
+              callback = function()
+                vim.lsp.buf.document_highlight()
+                -- LSP 请求是异步的；Rust Analyzer 处理大文件时可能稍慢，
+                -- 分阶段刷新以确保引用 extmark 返回后能投影到滚动条。
+                for _, delay in ipairs({ 80, 200, 500, 1000 }) do
+                  vim.defer_fn(function()
+                    if _G.refresh_lsp_reference_scrollbar then
+                      _G.refresh_lsp_reference_scrollbar(bufnr)
+                    end
+                  end, delay)
+                end
+              end,
             })
 
             vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
               group = highlight_group,
               buffer = bufnr,
-              callback = vim.lsp.buf.clear_references,
+              callback = function()
+                vim.lsp.buf.clear_references()
+                if _G.refresh_lsp_reference_scrollbar then
+                  _G.refresh_lsp_reference_scrollbar(bufnr)
+                end
+              end,
             })
 
             vim.api.nvim_create_autocmd("LspDetach", {

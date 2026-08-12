@@ -111,6 +111,7 @@ require("lazy").setup({
   { import = "plugins.lsp" },-- LSP
   { import = "plugins.neo_tree" },-- 文件树插件
   { import = "plugins.none_ls" },-- 伪 LSP 桥接器
+  { import = "plugins.scrollbar" },-- 编辑窗口右侧的引用/诊断滚动条
   { import = "plugins.status" },-- 状态栏
   { import = "plugins.subject_skin" },-- 主题皮肤
   { import = "plugins.term" },-- 终端
