@@ -29,6 +29,36 @@ return {
       -- cmp-nvim-lsp 默认已经包含 semantic tokens 的 capabilities
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
+      -- 查找引用时不包含声明；若只有一个结果则直接跳转，多个结果再打开列表。
+      local function smart_references()
+        vim.lsp.buf.references({ includeDeclaration = false }, {
+          on_list = function(options)
+            local items = options.items or {}
+
+            if #items == 0 then
+              vim.notify("No references found", vim.log.levels.INFO)
+              return
+            end
+
+            if #items == 1 then
+              local item = items[1]
+              local target_buf = vim.fn.bufadd(item.filename)
+              vim.fn.bufload(target_buf)
+
+              -- 把当前位置加入跳转列表，以便用 <C-o> 返回。
+              vim.cmd("normal! m'")
+              vim.api.nvim_win_set_buf(0, target_buf)
+              vim.api.nvim_win_set_cursor(0, { item.lnum, math.max(item.col - 1, 0) })
+              vim.cmd("normal! zv")
+              return
+            end
+
+            vim.fn.setqflist({}, " ", options)
+            vim.cmd("copen")
+          end,
+        })
+      end
+
       -- ========== LspAttach：按键映射 ==========
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
@@ -37,13 +67,19 @@ return {
           local client = vim.lsp.get_client_by_id(args.data.client_id)
           if not client then return end
 
-          local map = function(mode, lhs, rhs, desc)
-            vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
+          local map = function(mode, lhs, rhs, desc, opts)
+            vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("force", {
+              buffer = bufnr,
+              silent = true,
+              desc = desc,
+            }, opts or {}))
           end
 
           map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
           map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
-          map("n", "gr", vim.lsp.buf.references, "Go to References")
+          -- Neovim 0.12 内置了 gra/grn/grr 等映射。若不设置 nowait，
+          -- 按下 gr 后会等待 timeoutlen，确认用户是否还要输入第三个键。
+          map("n", "gr", smart_references, "Go to References", { nowait = true })
           map("n", "gi", vim.lsp.buf.implementation, "Go to Implementation")
           map("n", "K", vim.lsp.buf.hover, "Hover")
           map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
