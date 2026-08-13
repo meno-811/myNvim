@@ -19,6 +19,8 @@ return{
         config = function()
             require("bufferline").setup({
                 options = {
+                    -- 禁止从会话恢复手动排列；否则 custom_sort 会覆盖 sort_by。
+                    persist_buffer_sort = false,
                     -- 显示 buffer 编号，方便用数字切换
                     numbers = "ordinal",  -- 显示 1, 2, 3...
                     -- numbers = "buffer_id",  -- 显示真实 buffer id
@@ -38,12 +40,12 @@ return{
                     -- 是否总是显示 tabline
                     always_show_bufferline = true,
 
-                    -- 鼠标叉号和右键统一使用安全 buffer 删除，保留窗口布局。
+                    -- 鼠标叉号和右键统一使用可回收替代 buffer 的关闭逻辑。
                     close_command = function(bufnr)
-                        require("mini.bufremove").delete(bufnr, false)
+                        require("utils.buffer").close(bufnr)
                     end,
                     right_mouse_command = function(bufnr)
-                        require("mini.bufremove").delete(bufnr, false)
+                        require("utils.buffer").close(bufnr)
                     end,
                 },
   

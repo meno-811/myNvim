@@ -13,14 +13,17 @@ return {
     ---@param opts AstroCoreOpts
     opts = function(_, opts)
         local astro = require "astrocore"
+        local buffer = require "utils.buffer"
         local maps = astro.empty_map_table()
+
+        buffer.setup()
 
         local function close_current_view()
             if vim.bo.buftype == "quickfix" then
                 local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
                 vim.cmd(wininfo and wininfo.loclist == 1 and "lclose" or "cclose")
             else
-                require("mini.bufremove").delete(0, false)
+                buffer.close()
             end
         end
 
@@ -35,6 +38,8 @@ return {
         maps.n["<C-L>"] = { "<Cmd>vertical resize +2<CR>", desc = "Resize split right" }
         maps.n["<Tab>"] = { "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" }
         maps.n["<S-Tab>"] = { "<Cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" }
+        maps.n["<Leader>["] = { "<C-o>", desc = "Jump backward" }
+        maps.n["<Leader>]"] = { "<C-i>", desc = "Jump forward" }
         maps.n["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }
         maps.i["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }
         maps.x["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }

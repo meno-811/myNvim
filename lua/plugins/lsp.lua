@@ -55,6 +55,17 @@ return {
 
             vim.fn.setqflist({}, " ", options)
             vim.cmd("copen")
+
+            -- 引用结果只作为临时选择窗口：回车跳转后立即关闭列表。
+            -- 映射仅绑定到本次 quickfix buffer，不影响其他窗口。
+            vim.keymap.set("n", "<CR>", function()
+              vim.cmd("cc")
+              vim.cmd("cclose")
+            end, {
+              buffer = 0,
+              silent = true,
+              desc = "Jump to reference and close results",
+            })
           end,
         })
       end

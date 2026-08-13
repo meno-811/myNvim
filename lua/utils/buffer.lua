@@ -18,7 +18,10 @@ function M.close(bufnr)
         existing[id] = true
     end
 
-    require("mini.bufremove").delete(bufnr, false)
+    -- IDE-style tab close: remove the buffer identity completely. `delete()`
+    -- only unloads it, so reopening the same path can resurrect the old buffer
+    -- id and Bufferline position. `wipeout()` makes a later open a new tab.
+    require("mini.bufremove").wipeout(bufnr, false)
 
     -- mini.bufremove may create a listed, unnamed buffer to preserve the window.
     -- Mark only buffers created by this close operation, so user-created :enew
