@@ -19,3 +19,6 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 ctrl+h/j/k/l 移动到左/下/上/右窗口
 ctrl+上下左右 调整窗口大小
 ctrl+\ 打开终端
+空格+m 在 Markdown 文件中切换实时渲染预览
+空格后稍作停顿 查看可用快捷键提示
+空格+? 查看当前缓冲区的快捷键

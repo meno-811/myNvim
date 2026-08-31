@@ -38,8 +38,8 @@ return {
         maps.n["<C-L>"] = { "<Cmd>vertical resize +2<CR>", desc = "Resize split right" }
         maps.n["<Tab>"] = { "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" }
         maps.n["<S-Tab>"] = { "<Cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" }
-        maps.n["<Leader>["] = { "<C-o>", desc = "Jump backward" }
-        maps.n["<Leader>]"] = { "<C-i>", desc = "Jump forward" }
+        maps.n["<C-d>"] = { "<C-o>", desc = "Jump backward" }
+        maps.n["<C-f>"] = { "<C-i>", desc = "Jump forward" }
         maps.n["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }
         maps.i["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }
         maps.x["<C-s>"] = { "<Cmd>write<CR>", desc = "Save file" }
@@ -148,7 +148,7 @@ return {
             enabled = true,
             highlight = true,
             indent = true,
-            ensure_installed = { "lua", "vim", "vimdoc", "bash", "markdown", "json", "go", "python" },
+            ensure_installed = { "lua", "vim", "vimdoc", "bash", "markdown", "markdown_inline", "json", "go", "python" },
             auto_install = true,
             textobjects = {
                 select = {

@@ -109,6 +109,7 @@ require("lazy").setup({
   { import = "plugins.daps" },-- 调试器插件
   { import = "plugins.git" },-- Git 相关的插件
   { import = "plugins.lsp" },-- LSP
+  { import = "plugins.markdown" },-- Markdown 文档实时渲染
   { import = "plugins.neo_tree" },-- 文件树插件
   { import = "plugins.none_ls" },-- 伪 LSP 桥接器
   { import = "plugins.scrollbar" },-- 编辑窗口右侧的引用/诊断滚动条
