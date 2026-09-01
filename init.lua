@@ -5,5 +5,8 @@
 -- Leader 必须在插件管理器启动前设置
 require("key_map")
 
+-- 加载自定义用户命令
+require("commands")
+
 -- 加载插件管理
 require("plugins")
