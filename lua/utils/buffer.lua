@@ -33,6 +33,43 @@ function M.close(bufnr)
     end
 end
 
+local function listed_buffers_except(keep)
+    local buffers = {}
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.bo[bufnr].buflisted and bufnr ~= keep then
+            table.insert(buffers, bufnr)
+        end
+    end
+    return buffers
+end
+
+local function close_many(buffers)
+    local modified = {}
+    for _, bufnr in ipairs(buffers) do
+        if vim.bo[bufnr].modified then
+            local name = vim.api.nvim_buf_get_name(bufnr)
+            table.insert(modified, name ~= "" and vim.fn.fnamemodify(name, ":t") or "[未命名]")
+        end
+    end
+
+    if #modified > 0 then
+        vim.notify("以下标签页尚未保存，已取消关闭：" .. table.concat(modified, "、"), vim.log.levels.WARN)
+        return
+    end
+
+    for _, bufnr in ipairs(buffers) do
+        if vim.api.nvim_buf_is_valid(bufnr) then M.close(bufnr) end
+    end
+end
+
+function M.close_all()
+    close_many(listed_buffers_except(nil))
+end
+
+function M.close_others()
+    close_many(listed_buffers_except(vim.api.nvim_get_current_buf()))
+end
+
 function M.setup()
     local group = vim.api.nvim_create_augroup("close_replacement_buffers", { clear = true })
     vim.api.nvim_create_autocmd("BufHidden", {

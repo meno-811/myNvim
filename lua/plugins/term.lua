@@ -16,12 +16,15 @@ return {
                         silent = true,
                     }
 
-                    -- Esc：终端输入模式 → 终端普通模式
+                    -- Alt+n（Normal）：终端输入模式 → 终端普通模式。
+                    -- 保留 Esc 给终端内的交互程序使用。
                     vim.keymap.set(
                         "t",
-                        "<Esc>",
+                        "<A-n>",
                         [[<C-\><C-n>]],
-                        opts
+                        vim.tbl_extend("force", opts, {
+                            desc = "进入终端普通模式",
+                        })
                     )
                 end,
             })

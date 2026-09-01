@@ -9,6 +9,12 @@ return {
         auto_insert = false,
         snacks_win_opts = {
           keys = {
+            claude_terminal_normal = {
+              "<A-n>",
+              function() vim.cmd("stopinsert") end,
+              mode = "t",
+              desc = "进入终端普通模式",
+            },
             claude_win_left = {
               "<C-Left>",
               function() vim.cmd("wincmd h") end,

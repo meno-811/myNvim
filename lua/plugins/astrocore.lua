@@ -51,6 +51,14 @@ return {
             close_current_view,
             desc = "Close current view",
         }
+        maps.n["<Leader>ba"] = {
+            buffer.close_all,
+            desc = "Close all buffers",
+        }
+        maps.n["<Leader>bo"] = {
+            buffer.close_others,
+            desc = "Close other buffers",
+        }
         for index = 1, 9 do
             maps.n["<Leader>" .. index] = {
                 "<Cmd>BufferLineGoToBuffer " .. index .. "<CR>",
@@ -93,7 +101,8 @@ return {
                 ignorecase = true,
                 smartcase = true,
                 incsearch = true,
-                virtualedit = "onemore",
+                -- 块选择时允许光标越过短行行尾；其他模式仍保留左右键跨行。
+                virtualedit = "block,onemore",
                 whichwrap = "b,s,<,>,h,l",
                 mouse = "a",
                 clipboard = "unnamedplus",
