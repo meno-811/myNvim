@@ -78,6 +78,7 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.l
 - `term.lua`：ToggleTerm。
 - `subject_skin.lua`：Catppuccin 主题。
 - `ai_claudecode.lua`：Claude Code IDE 集成。
+- `ai_copilotchat.lua`：Copilot Chat 备用配置；导入行当前保持注释，不会加载。
 
 插件内部快捷键可以继续留在插件 spec 的 `keys` 或 `config` 中。例如 Neo-tree 的 `<Leader>e` 同时承担延迟加载触发器，如果强行移入 AstroCore，反而会破坏 lazy.nvim 的按需加载语义。
 

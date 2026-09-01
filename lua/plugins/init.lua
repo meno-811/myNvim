@@ -172,6 +172,7 @@ vim.cmd([[cnoreabbrev <expr> readme getcmdtype() ==# ':' && getcmdline() ==# 're
 
 require("lazy").setup({
   { import = "plugins.ai_claudecode" },-- Claude Code IDE 集成
+  -- { import = "plugins.ai_copilotchat" },-- Copilot Chat 备用方案（当前不加载）
   { import = "plugins.ai_copilot" },-- GitHub Copilot 官方插件
   { import = "plugins.astrocore" },-- AstroCore 插件
   { import = "plugins.breadcrumb" },-- 可点击的 IDE 风格路径导航栏
