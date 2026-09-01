@@ -5,18 +5,13 @@
 return {
     "AstroNvim/astrocore",
     dependencies = {
-        {
-            "nvim-mini/mini.nvim",
-            config = function() require("mini.bufremove").setup() end,
-        },
+        "folke/snacks.nvim",
     },
     ---@param opts AstroCoreOpts
     opts = function(_, opts)
         local astro = require "astrocore"
         local buffer = require "utils.buffer"
         local maps = astro.empty_map_table()
-
-        buffer.setup()
 
         local function close_current_view()
             if vim.bo.buftype == "quickfix" then

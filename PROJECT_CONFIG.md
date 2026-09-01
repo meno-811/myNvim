@@ -89,7 +89,7 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.l
 | `set_up.lua` 中的 FileType autocmd | `opts.autocmds` | 自动命令集中且自带 augroup 管理 |
 | 手写诊断全局配置 | `opts.diagnostics` | AstroCore 原生支持 `vim.diagnostic.config()` 参数 |
 | 插入模式诊断切换 autocmd | `opts.autocmds.diagnostics_by_mode` | 仍需事件驱动，但由 AstroCore 注册 |
-| 手写 buffer 关闭 | `mini.bufremove.delete()` | 使用 AstroCore 兼容的专用模块并保持窗口布局 |
+| 手写 buffer 关闭 | `Snacks.bufdelete({ wipe = true })` | 使用插件维护的 buffer 替换、未保存提示和窗口布局保护 |
 | 旧版 Treesitter 模块配置 | `opts.treesitter` | AstroCore 已适配 Treesitter main 新 API |
 | 分散的普通快捷键 | `opts.mappings` | 统一描述、规范化键名并可执行冲突健康检查 |
 
@@ -108,9 +108,9 @@ AstroCore 本身也是对这些 API 的组织层，而不是替代 Neovim API �
 
 ### 关于 buffer 关闭
 
-独立安装 AstroCore 时，它不会像完整 AstroNvim 那样初始化 `vim.t.bufs` buffer 跟踪列表，因此不能直接调用依赖该列表的 `astrocore.buffer.close()`。项目使用 AstroCore 明确兼容的 `mini.bufremove` 模块安全删除 buffer；快捷键仍由 AstroCore 管理。这样既避免维护大段自定义关闭逻辑，也不会破坏窗口布局。
+独立安装 AstroCore 时，它不会像完整 AstroNvim 那样初始化 `vim.t.bufs` buffer 跟踪列表，因此不能直接调用依赖该列表的 `astrocore.buffer.close()`。项目改用 `Snacks.bufdelete` 安全删除 buffer；快捷键仍由 AstroCore 管理。`wipe = true` 保留“关闭后重新打开时获得新 buffer”的标签页语义，Snacks 负责选择替代 buffer、保护窗口布局并处理未保存提示。
 
-`Space+Q` 在普通文件中使用 `mini.bufremove` 安全删除 buffer；在 quickfix 或 location-list 结果窗口中关闭对应窗口。Bufferline 的鼠标叉号同样使用 `mini.bufremove`。`:q`/`:quit` 保留 Neovim 原义：关闭当前窗口，关闭最后一个窗口时退出 Neovim。Neo-tree 即使成为最后一个窗口也不会主动关闭 Neovim。
+`Space+Q` 在普通文件中使用 `Snacks.bufdelete` 安全删除 buffer；在 quickfix 或 location-list 结果窗口中关闭对应窗口。Bufferline 的鼠标叉号同样使用这套逻辑。`:q`/`:quit` 保留 Neovim 原义：关闭当前窗口，关闭最后一个窗口时退出 Neovim。Neo-tree 即使成为最后一个窗口也不会主动关闭 Neovim。
 
 ## 已完成的精简
 

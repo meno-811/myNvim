@@ -26,27 +26,6 @@ return {
     },
   },
 
-  -- lazygit 关闭后刷新 Neo-tree 的几个 source
-  init = function()
-    vim.api.nvim_create_autocmd("TermClose", {
-      pattern = "*lazygit*", -- 匹配 lazygit 终端名
-      callback = function()
-        local ok, manager = pcall(require, "neo-tree.sources.manager")
-        if not ok then
-          return
-        end
-
-        -- 刷新以下 source（如果已加载）
-        for _, source in ipairs({ "filesystem", "git_status", "diagnostics" }) do
-          local mod = "neo-tree.sources." .. source
-          if package.loaded[mod] then
-            manager.refresh(require(mod).name)
-          end
-        end
-      end,
-    })
-  end,
-
   opts = function()
     local git_available = vim.fn.executable("git") == 1 -- 检查系统是否有 git 可执行文件
 

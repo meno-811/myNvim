@@ -28,6 +28,21 @@ return {
   {
     "kdheepak/lazygit.nvim",
     cmd = { "LazyGit", "LazyGitConfig", "LazyGitFilter", "LazyGitFilterCurrentFile" },
+    init = function()
+      -- 使用 lazygit.nvim 的官方退出回调刷新已加载的 Neo-tree source，
+      -- 避免监听所有终端并依赖终端 buffer 名称。
+      vim.g.lazygit_on_exit_callback = function()
+        local ok, manager = pcall(require, "neo-tree.sources.manager")
+        if not ok then return end
+
+        for _, source in ipairs({ "filesystem", "git_status", "diagnostics" }) do
+          local module_name = "neo-tree.sources." .. source
+          if package.loaded[module_name] then
+            manager.refresh(require(module_name).name)
+          end
+        end
+      end
+    end,
     keys = {
       { "<leader>gg", "<cmd>LazyGit<cr>", desc = "Open LazyGit" },
     },

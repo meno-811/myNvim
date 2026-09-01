@@ -2,6 +2,7 @@
 return {
   "petertriho/nvim-scrollbar",
   event = { "BufReadPost", "BufNewFile" },
+  dependencies = { "kevinhwang91/nvim-hlslens" },
   opts = {
     show_in_active_only = true,
     hide_if_all_visible = true,
@@ -30,7 +31,7 @@ return {
       cursor = true,
       diagnostic = true,
       handle = true,
-      -- 搜索标记由下面的原生搜索同步逻辑维护，不依赖 hlslens。
+      -- 由 config 中的官方 hlslens 处理器启用，避免 setup 阶段重复注册。
       search = false,
       gitsigns = false,
     },
@@ -50,57 +51,22 @@ return {
 
     require("scrollbar").setup(opts)
 
-    local function sync_native_search_marks()
-      local bufnr = vim.api.nvim_get_current_buf()
-      local utils = require("scrollbar.utils")
-      local scrollbar_marks = utils.get_scrollbar_marks(bufnr)
-
-      if vim.v.hlsearch == 0 or vim.fn.getreg("/") == "" then
-        scrollbar_marks.search = nil
-      else
-        local pattern = vim.fn.getreg("/")
-        local search_marks = {}
-
-        -- 每个匹配行只需要一个滚动条标记；vim.fn.match 使用同一套 Vim 正则。
-        for line, text in ipairs(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)) do
-          local ok, column = pcall(vim.fn.match, text, pattern)
-          if ok and column >= 0 then
-            search_marks[#search_marks + 1] = {
-              line = line - 1,
-              text = "━",
-              type = "Search",
-              level = 1,
-            }
-          end
-        end
-        scrollbar_marks.search = search_marks
-      end
-
-      utils.set_scrollbar_marks(bufnr, scrollbar_marks)
-      require("scrollbar").render()
-    end
-
-    local function native_word_search(key)
-      vim.cmd.normal({ key, bang = true })
-      vim.schedule(sync_native_search_marks)
-    end
-
-    vim.keymap.set("n", "*", function() native_word_search("*") end, {
-      silent = true,
-      desc = "向后搜索光标单词并标记滚动条",
+    -- 使用 nvim-scrollbar 官方 hlslens 处理器提供搜索位置，避免逐行扫描全文；
+    -- override_lens 关闭 hlslens 自身的行尾计数，只保留滚动条标记。
+    require("hlslens").setup({
+      override_lens = function() end,
     })
-    vim.keymap.set("n", "#", function() native_word_search("#") end, {
-      silent = true,
-      desc = "向前搜索光标单词并标记滚动条",
-    })
+    require("scrollbar.handlers.search").setup()
 
-    vim.api.nvim_create_autocmd("CmdlineLeave", {
-      group = vim.api.nvim_create_augroup("ScrollbarNativeSearch", { clear = true }),
-      pattern = { "/", "?", ":" },
-      callback = function()
-        vim.schedule(sync_native_search_marks)
-      end,
-      desc = "同步 Neovim 搜索结果到滚动条",
+    -- hlslens 不会自动接管原生 `*`/`#`；按官方建议在搜索后启动 lens，
+    -- 让黄色搜索标记持续保留在滚动条上，直到用户执行 :noh。
+    vim.keymap.set("n", "*", [[*<Cmd>lua require("hlslens").start()<CR>]], {
+      silent = true,
+      desc = "向后搜索光标单词并持续标记滚动条",
+    })
+    vim.keymap.set("n", "#", [[#<Cmd>lua require("hlslens").start()<CR>]], {
+      silent = true,
+      desc = "向前搜索光标单词并持续标记滚动条",
     })
 
     -- Neovim 的 document_highlight 会把语义引用写入 nvim.lsp.references
