@@ -27,6 +27,7 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `Shift+↑` / `Shift+↓` | 向上 / 向下翻页 |
 | `<Leader>;` | 操作顶部路径导航栏 |
 | `Ctrl+v`（或 `Ctrl+q`） | 进入块可视模式 |
+| `gc` / `gcc` | 注释操作符 / 切换当前行注释 |
 | `gD` | 跳转到声明 |
 | `gi` | 跳转到实现（接口、trait 或抽象类型） |
 | `<Leader>ba` | 关闭全部标签页 |
@@ -38,6 +39,13 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `Ctrl+\` | 打开或关闭终端 |
 | `<Leader>m` | 在 Markdown 文件中切换实时渲染 |
 | `<Leader>?` | 查看当前缓冲区可用快捷键 |
+
+## 代码补全
+
+| 快捷键 | 功能 |
+| --- | --- |
+| `Alt+l` | 接受 Copilot 的整条建议 |
+| `Tab` | 跳转 LuaSnip 占位符；否则执行正常缩进，不接受 Copilot 建议 |
 
 ## 终端操作
 

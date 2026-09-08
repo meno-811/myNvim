@@ -40,21 +40,26 @@ return {
             else
               fallback()
             end
-          end, { 'i', 's' }), -- 仅确认手动选择的候选项，否则正常换行
-          -- Tab 仅用于代码片段占位符跳转，不参与补全项选择
+          end, { 'i', 's' }), -- 回车确认手动选择的候选项，否则正常换行
+          -- Tab 确认选中的候选项，未选择时应用首项；无菜单时执行代码片段跳转或默认行为
           ['<Tab>'] = cmp.mapping(function(fallback)
-            if luasnip.expand_or_jumpable() then luasnip.expand_or_jump()
-            else fallback() end          -- 否则 → 执行默认 Tab 行为（输入制表符）
+            if cmp.visible() then
+              cmp.confirm({ select = true })
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
           end, { 'i', 's' }),           -- 在插入模式（i）和选择模式（s）下生效
           ['<Up>'] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
           ['<Down>'] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-          -- ['<Esc>'] = cmp.mapping(function(fallback)
-          --   if cmp.visible() then
-          --     cmp.abort()
-          --   else
-          --     fallback()
-          --   end
-          -- end, { 'i', 's' }),
+          ['<Esc>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.abort() -- 仅取消本次补全，保持插入模式
+            else
+              fallback() -- 没有补全菜单时，正常退出插入模式
+            end
+          end, { 'i' }),
         }),
         -- 优先级：LSP -> Buffer -> Path
         sources = cmp.config.sources({

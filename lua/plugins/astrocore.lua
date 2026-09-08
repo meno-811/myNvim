@@ -61,6 +61,27 @@ return {
             }
         end
 
+        -- 仅文本 buffer 在首尾行追加 Home/End 行为；其他位置保留原生移动。
+        for _, mode in ipairs { "n", "i", "x" } do
+            for key, boundary in pairs { ["<Up>"] = "<Home>", ["<Down>"] = "<End>" } do
+                maps[mode][key] = {
+                    function()
+                        if vim.bo.buftype ~= "" or vim.fn.pumvisible() == 1 then return key end
+                        local row = vim.fn.line "."
+                        if (key == "<Up>" and row == 1)
+                            or (key == "<Down>" and row == vim.fn.line("$")) then
+                            return boundary
+                        end
+                        return key
+                    end,
+                    expr = true,
+                    silent = true,
+                    desc = key == "<Up>" and "Move up or to start of first line"
+                        or "Move down or to end of last line",
+                }
+            end
+        end
+
         maps.i["<Left>"] = {
             function()
                 return vim.fn.pumvisible() == 1 and "<Left>" or "<C-o>h"
