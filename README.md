@@ -83,15 +83,3 @@ Lua、Python、JavaScript、Go、Rust 文件关闭自动折行；Markdown、text
 | --- | --- |
 | `>` | 切换到右侧标签 |
 | `<` | 切换到左侧标签 |
-
-## DAP 排查
-
-`nvim-nio` 已在 `lua/plugins/daps.lua` 中声明为 DAP UI 的依赖，无需重复添加或移动。
-
-如果出现 “requires nvim-nio to be installed”，先检查原始加载错误：
-
-```vim
-:lua local ok, result = pcall(require, "nio"); print(ok, result)
-```
-
-这条提示也可能由模块初始化失败引起。本项目曾在受限测试环境中因无法写入 `nio.log` 触发它，插件本身并未缺失。详细过程与检查注意事项见 [PROJECT_CONFIG.md](PROJECT_CONFIG.md#dap-ui-提示缺少-nvim-nio-时)。
