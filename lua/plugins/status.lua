@@ -2,6 +2,15 @@
 
 
 return{
+    -- Buffer 关闭依赖 Snacks；快捷键和插件一起注册。
+    {
+        "folke/snacks.nvim",
+        keys = {
+            { "<Leader>q", function() require("utils.buffer").close_view() end, desc = "Close current view" },
+            { "<Leader>ba", function() require("utils.buffer").close_all() end, desc = "Close all buffers" },
+            { "<Leader>bo", function() require("utils.buffer").close_others() end, desc = "Close other buffers" },
+        },
+    },
     -- lualine.nvim,  美化并增强底部状态栏，显示当前模式、文件路径、Git 分支、文件编码、行号等信息。
     {
         "nvim-lualine/lualine.nvim",
@@ -15,7 +24,21 @@ return{
     -- bufferline.nvim  在顶部显示已打开文件的标签页（类似 VS Code 的标签栏），支持鼠标点击、图标显示、诊断标记等。
     {
         "akinsho/bufferline.nvim",
-        dependencies = { "nvim-tree/nvim-web-devicons" },
+        dependencies = { "nvim-tree/nvim-web-devicons", "folke/snacks.nvim" },
+        keys = function()
+            local keys = {
+                { "<Tab>", "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" },
+                { "<S-Tab>", "<Cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" },
+            }
+            for index = 1, 9 do
+                keys[#keys + 1] = {
+                    "<Leader>" .. index,
+                    "<Cmd>BufferLineGoToBuffer " .. index .. "<CR>",
+                    desc = "Go to buffer " .. index,
+                }
+            end
+            return keys
+        end,
         config = function()
             require("bufferline").setup({
                 options = {

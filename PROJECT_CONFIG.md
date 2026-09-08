@@ -1,6 +1,6 @@
 # Neovim 配置说明
 
-最后核对日期：2026-09-01
+最后核对日期：2026-09-08
 
 这份文档记录本项目当前的设计、各文件职责、关键实现取舍和快捷键风险。它既是配置索引，也是以后排查“这段代码为什么存在”的依据。
 
@@ -8,39 +8,59 @@
 
 项目目前主要面向 Go、Python 和 Lua 开发。配置采用以下分工：
 
-- AstroCore 管理 Neovim 编辑器级能力：选项、普通快捷键、自动命令、诊断和 Treesitter。
+- 原生配置按快捷键、选项、自动命令和用户命令分类；AstroCore 保留诊断基础配置和 Treesitter 适配。
 - lazy.nvim 管理插件的安装与加载。
-- 各插件文件只管理该插件自己的设置和需要触发延迟加载的快捷键。
+- 各插件文件管理该插件自己的设置和专属快捷键；需要触发延迟加载的快捷键通过插件 `keys` 注册。
 - LSP 文件保留语言服务器配置及只在 LSP attach 后有效的 buffer 局部行为。
 
 这并不等于使用完整 AstroNvim 发行版。项目仍然是独立的 Neovim 配置，只复用 `astrocore` 提供的配置框架和通用工具。
 
 ## 启动流程
 
-1. `init.lua` 首先加载 `key_map.lua`，提前设置 Leader 键。
-2. `init.lua` 加载 `commands.lua`，注册自定义用户命令。
-3. `init.lua` 加载 `plugins`。
-4. `lua/plugins/init.lua` 引导 lazy.nvim，并导入各插件模块。
-5. AstroCore 应用编辑器级选项、快捷键、自动命令、诊断和 Treesitter 配置。
-6. 其他插件根据启动条件或命令按需加载。
+1. `init.lua` 加载 `options.lua`，设置原生选项。
+2. 加载 `key_map.lua`，设置 Leader 和原生快捷键。
+3. 加载 `autocmds.lua`，注册原生事件行为。
+4. 加载 `commands.lua`，注册自定义用户命令。
+5. 加载 `plugins`，由 lazy.nvim 加载各插件及其专属快捷键。
+6. AstroCore 应用诊断基础配置和 Treesitter 适配。
 
-Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.lua` 是一个很小的启动前配置文件。
+Leader 必须在 lazy.nvim 解析插件快捷键之前设置。每个映射和选项只在所属文件定义一次。
 
 ## 核心配置位置
 
+### `lua/key_map.lua`
+
+原生快捷键和简短回调：窗口导航与缩放、保存与撤销、跳转列表、上下键在文件首尾行跳到行首尾、插入模式左右跨行，以及 Ctrl+左右到行首尾。直接使用 `vim.keymap.set`，不依赖 AstroCore。
+
+- 上下键在普通、插入和可视模式生效，仅对 `buftype` 为空的文本 buffer 启用边界行为。到达首尾行后再按一次才跳到行首尾；其他位置返回原生方向键。
+- 行首使用 `<Home>`，包含前导空格；行尾使用 `<End>`，遵循当前模式语义，插入模式停在最后一个字符之后。
+- 插入模式 Ctrl+左右直接映射为 `<Home>` / `<End>`，保持插入模式；普通模式 Ctrl+方向键仍用于窗口导航。
+- 补全菜单可见时上下键保留候选项选择语义；nvim-cmp 未显示菜单时回退到原有映射。
+
+### `lua/options.lua`
+
+行号、缩进、搜索、剪贴板、鼠标、滚动边距、`virtualedit` 和 `whichwrap` 等原生选项。
+
+### `lua/autocmds.lua`
+
+代码文件关闭换行，文本文件开启友好换行；进入插入模式隐藏诊断文字，离开时恢复。使用命名 augroup 防止重新加载时重复注册。
+
+| 事件 | 匹配范围 | 行为 |
+| --- | --- | --- |
+| `FileType` | lua、python、javascript、go、rust | 设置窗口 `wrap = false` |
+| `FileType` | markdown、text、vimwiki | 设置窗口 `wrap = true`、`linebreak = true` |
+| `InsertEnter` | 全局 | 设置诊断 `virtual_text = false` |
+| `InsertLeave` | 全局 | 设置诊断 `virtual_text = true` |
+
+折行仅改变显示，不修改文件内容。诊断切换只控制行旁文字，不关闭诊断检查、标记或下划线。上述规则使用 `user_editor` 分组，重新加载时清除旧注册。LSP 等插件专属事件仍留在对应插件文件中。
+
 ### `lua/plugins/astrocore.lua`
 
-这是当前项目的核心入口，包含：
+仅保留诊断基础配置和 Treesitter 的解析器、高亮、缩进及文本对象适配。
 
-- 窗口移动与窗口大小调整快捷键。
-- Bufferline 切换、按编号跳转和按当前内容类型关闭的快捷键。
-- `:q`/`:quit` 保留 Neovim 原生命令语义。
-- 插入模式左右方向键跨行移动逻辑。
-- 行号、缩进、搜索、剪贴板、鼠标、滚动边距等基础选项。
-- 代码文件关闭自动换行、文本文件开启友好换行的 FileType 自动命令。
-- 插入模式隐藏诊断文字、普通模式恢复诊断文字的自动命令。
-- 全局诊断显示策略。
-- Treesitter 解析器、高亮、缩进和文本对象。
+### `lua/plugins/status.lua`
+
+lualine、Bufferline 和用于关闭 buffer 的 Snacks 配置。标签切换、按编号跳转及关闭快捷键通过对应插件的 `keys` 注册。关闭行为由 `lua/utils/buffer.lua` 复用。
 
 ### `lua/plugins/lsp.lua`
 
@@ -75,7 +95,7 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.l
 - `daps.lua`：Go/Python 调试器及 DAP UI。
 - `neo_tree.lua`：文件树及其内部操作。
 - `git.lua`：Git 相关插件。
-- `status.lua`：lualine 和 bufferline 的外观设置。
+- `status.lua`：lualine、Bufferline 外观及标签快捷键，Snacks 关闭 buffer 快捷键。
 - `term.lua`：ToggleTerm。
 - `subject_skin.lua`：Catppuccin 主题。
 - `ai_claudecode.lua`：Claude Code IDE 集成。
@@ -85,7 +105,7 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置，因此 `key_map.l
 
 ## AstroCore 与原生 API 的职责边界
 
-AstroCore 管理适合集中管理的核心能力，具体插件生命周期内的行为则直接使用 Neovim API。
+不依赖插件的配置直接使用 Neovim API，按快捷键、选项、事件和命令归类。依赖插件的设置与快捷键放在对应插件配置中；功能专用的局部快捷键与功能一起维护。
 
 以下情况直接调用 Neovim API：
 
@@ -94,11 +114,11 @@ AstroCore 管理适合集中管理的核心能力，具体插件生命周期内�
 - nvim-cmp 根据补全菜单状态执行的复杂按键逻辑。
 - DAP adapter 和调试事件监听。
 
-AstroCore 是这些 API 的组织层，并不替代 Neovim API。
+本项目不再通过 AstroCore 注册原生快捷键、基础选项和自动命令。新增配置按以上职责归位，避免在原生模块与插件配置中重复定义。
 
 ### 关于 buffer 关闭
 
-独立安装 AstroCore 时，它不会像完整 AstroNvim 那样初始化 `vim.t.bufs` buffer 跟踪列表，因此不能直接调用依赖该列表的 `astrocore.buffer.close()`。项目使用 `Snacks.bufdelete` 安全删除 buffer，快捷键由 AstroCore 管理。`wipe = true` 保留“关闭后重新打开时获得新 buffer”的标签页语义，Snacks 负责选择替代 buffer、保护窗口布局并处理未保存提示。
+独立安装 AstroCore 时，它不会像完整 AstroNvim 那样初始化 `vim.t.bufs` buffer 跟踪列表，因此不能直接调用依赖该列表的 `astrocore.buffer.close()`。项目使用 `Snacks.bufdelete` 安全删除 buffer，快捷键由 `plugins/status.lua` 中的 Snacks 配置管理。`wipe = true` 保留“关闭后重新打开时获得新 buffer”的标签页语义，Snacks 负责选择替代 buffer、保护窗口布局并处理未保存提示。
 
 `Space+Q` 在普通文件中使用 `Snacks.bufdelete` 安全删除 buffer；在 quickfix 或 location-list 结果窗口中关闭对应窗口。Bufferline 的鼠标叉号同样使用这套逻辑。`:q`/`:quit` 保留 Neovim 原义：关闭当前窗口，关闭最后一个窗口时退出 Neovim。Neo-tree 即使成为最后一个窗口也不会主动关闭 Neovim。
 
@@ -119,8 +139,8 @@ AstroCore 是这些 API 的组织层，并不替代 Neovim API。
 | `lua/plugins/breadcrumb.lua` 的全局开关 | 动态关闭所有现有 winbar，重新开启时触发重新附着 | Dropbar 提供 `bar.enable`，但没有完整等价的全局 toggle API | **保留**。手工刷新是为了让已打开窗口立刻响应 |
 | `lua/plugins/code_completion.lua` 的 `<CR>`/`<Tab>` 回调 | Enter 只确认手动选中的候选；Tab 只跳 LuaSnip 占位符，不选择补全项 | nvim-cmp 通过 mapping 回调提供这类条件行为，没有一个布尔选项完全等价 | **保留**。这是明确的补全交互策略 |
 | `lua/plugins/ai_copilot.lua` 的 `Alt+l` | Copilot 不再占用 Tab，用户通过独立按键明确接受整条建议 | copilot.vim 支持关闭默认 Tab 映射并调用 `copilot#Accept()` | **保留**。插件专属映射留在插件配置中，且不会改变 Tab 的原有行为 |
-| `lua/plugins/astrocore.lua` 的插入模式左右键 | 补全菜单显示时保持方向键语义；否则允许左右跨行 | Neovim 的 `whichwrap` 与表达式映射可实现；没有插件选项能同时表达这个条件 | **保留** |
-| `lua/plugins/astrocore.lua` 的插入/离开模式诊断切换 | 输入时隐藏 virtual text，离开输入模式恢复 | `update_in_insert` 只控制诊断更新时间，不控制是否显示已有 virtual text | **保留** |
+| `lua/key_map.lua` 的插入模式左右键 | 补全菜单显示时保持方向键语义；否则允许左右跨行 | Neovim 的 `whichwrap` 与表达式映射可实现；没有插件选项能同时表达这个条件 | **保留** |
+| `lua/autocmds.lua` 的插入/离开模式诊断切换 | 输入时隐藏 virtual text，离开输入模式恢复 | `update_in_insert` 只控制诊断更新时间，不控制是否显示已有 virtual text | **保留** |
 | `lua/plugins/term.lua` 的 `Alt+n` | ToggleTerm 中从终端输入模式进入普通模式，保留 `Esc` 给交互程序 | ToggleTerm 官方文档建议为退出终端模式设置 buffer-local mapping | **保留** |
 | `lua/plugins/ai_claudecode.lua` 的 `Alt+n` 和窗口移动键 | Claude Code 终端中进入普通模式、跨窗口移动 | Claude Code 官方将 `snacks_win_opts` 透传给 Snacks window，并支持其中的 `keys` | **保留**。当前写法就是插件公开配置入口 |
 
@@ -139,6 +159,8 @@ AstroCore 是这些 API 的组织层，并不替代 Neovim API。
 2. 插入模式 `<C-s>` 覆盖 Neovim 0.12 的 LSP `signature_help` 默认键。
 
    当前用途是保存文件，这是已确认的 IDE 风格选择。签名帮助如以后需要，可另设按键。
+
+3. 插入模式 `<C-Left>` / `<C-Right>` 改为行首/行尾，覆盖原生按词移动。普通模式的同名按键继续用于窗口导航。
 
 ### 中优先级
 
@@ -170,6 +192,16 @@ AstroCore 是这些 API 的组织层，并不替代 Neovim API。
 4. 保留已确认的 `gr`、`Ctrl+s`，以及 Neo-tree 路径选择器、Dropbar 动态开关、补全条件映射和终端 `<A-n>`。
 
 ## 常用检查命令
+
+### DAP UI 提示缺少 nvim-nio 时
+
+`lua/plugins/daps.lua` 已将 `nvim-neotest/nvim-nio` 声明为 `nvim-dap-ui` 的直接依赖，这是正确归属，无需挪到顶层或重复添加。`lazy-lock.json` 也记录了它。
+
+不要仅凭 dap-ui 的 “requires nvim-nio to be installed” 提示判断未安装：它用 `pcall(require, "nio")` 捕获所有加载错误，却丢弃原始原因。先用 `:lua local ok, result = pcall(require, "nio"); print(ok, result)` 查看真正的错误；若模块已加载或先前加载失败留下缓存，应在新进程中复现。
+
+2026-09-08 的受限无界面测试中，模块文件存在，真实错误是 `nio/logger.lua:52` 打开 `nio.log` 时 `Permission denied`。仅在测试进程内把日志目录指向可写临时目录后，`nio` 和 `dapui` 均加载成功。这是测试环境的写入限制，不能据此认定用户安装缺失，也不应为此修改项目依赖关系。
+
+### 检查入口
 
 - `:checkhealth astrocore`：检查 AstroCore 配置和快捷键冲突。
 - `:checkhealth nvim-treesitter`：检查 Treesitter 环境。

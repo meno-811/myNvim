@@ -15,6 +15,14 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 使用 `:readme` 或 `:Readme` 可以在浮动窗口中查看这套 Neovim 配置的 README；按
 `q` 或 `Esc` 关闭窗口。
 
+## 配置分类
+
+- `lua/key_map.lua`：原生快捷键，包括插入模式 Ctrl+左右到行首尾、上下键在文件边界跳到行首尾。
+- `lua/options.lua`：原生编辑器选项。
+- `lua/autocmds.lua`：文件类型换行、插入模式诊断显示等事件行为。
+- `lua/commands.lua`：自定义命令及其浮窗局部快捷键。
+- `lua/plugins/`：插件设置和插件专属快捷键；AstroCore 保留诊断基础配置与 Treesitter 适配。
+
 ## 常用快捷键
 
 `<Leader>` 默认为空格。
@@ -34,11 +42,25 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `<Leader>bo` | 仅保留当前标签页 |
 | `<Leader>e` | 打开或关闭文件树 |
 | `<Leader>1` 至 `<Leader>9` | 切换到对应编号的标签页 |
-| `Ctrl+方向键` | 移动到对应方向的窗口 |
+| `Ctrl+方向键`（普通模式） | 移动到对应方向的窗口 |
 | `Ctrl+h/j/k/l` | 调整窗口大小 |
 | `Ctrl+\` | 打开或关闭终端 |
 | `<Leader>m` | 在 Markdown 文件中切换实时渲染 |
 | `<Leader>?` | 查看当前缓冲区可用快捷键 |
+
+## 文本编辑行为
+
+| 快捷键 | 模式与行为 |
+| --- | --- |
+| `↑` | 普通、插入、可视模式：已在第一行时再按一次，到行首第 1 列 |
+| `↓` | 普通、插入、可视模式：已在最后一行时再按一次，到行尾 |
+| `Ctrl+←` | 插入模式：到行首第 1 列，保持插入模式 |
+| `Ctrl+→` | 插入模式：到最后一个字符之后，保持插入模式 |
+| `←` / `→` | 插入模式：允许跨行移动 |
+
+上下键的边界行为仅用于普通文本 buffer；其他位置仍正常上下移动，补全菜单中的上下键仍用于选择候选项。行首包含缩进空格，不是第一个非空白字符。
+
+Lua、Python、JavaScript、Go、Rust 文件关闭自动折行；Markdown、text、vimwiki 开启友好折行。这只改变显示，不会插入换行符。进入插入模式时隐藏诊断文字，离开时恢复；错误标记和下划线仍保留。
 
 ## 代码补全
 
@@ -61,3 +83,15 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | --- | --- |
 | `>` | 切换到右侧标签 |
 | `<` | 切换到左侧标签 |
+
+## DAP 排查
+
+`nvim-nio` 已在 `lua/plugins/daps.lua` 中声明为 DAP UI 的依赖，无需重复添加或移动。
+
+如果出现 “requires nvim-nio to be installed”，先检查原始加载错误：
+
+```vim
+:lua local ok, result = pcall(require, "nio"); print(ok, result)
+```
+
+这条提示也可能由模块初始化失败引起。本项目曾在受限测试环境中因无法写入 `nio.log` 触发它，插件本身并未缺失。详细过程与检查注意事项见 [PROJECT_CONFIG.md](PROJECT_CONFIG.md#dap-ui-提示缺少-nvim-nio-时)。

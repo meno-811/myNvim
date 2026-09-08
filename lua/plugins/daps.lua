@@ -5,6 +5,8 @@ return {
   {
     "mfussenegger/nvim-dap",
     dependencies = {
+      -- nio 是 dap-ui 的直接依赖，保留在此处。dap-ui 会把 require("nio") 的
+      -- 任意失败都报成“未安装”；受限测试中也可能只是 nio.log 无写入权限。
       { "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
       "theHamsta/nvim-dap-virtual-text",
     },
