@@ -38,6 +38,7 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `gc` / `gcc` | 注释操作符 / 切换当前行注释 |
 | `gD` | 跳转到声明 |
 | `gi` | 跳转到实现（接口、trait 或抽象类型） |
+| `K`（`Shift+k`） | 查看变量类型和文档：连续按为打开浮窗 → 进入浮窗 → 关闭浮窗 |
 | `<Leader>ba` | 关闭全部标签页 |
 | `<Leader>bo` | 仅保留当前标签页 |
 | `<Leader>e` | 打开或关闭文件树 |

@@ -69,6 +69,7 @@ lualine、Bufferline 和用于关闭 buffer 的 Snacks 配置。标签切换、�
 - Mason 安装 `gopls`、`pyright` 和 `lua_ls`。
 - 三种语言服务器的设置。
 - LSP attach 后才建立的 buffer 局部快捷键。
+- `K` 连续按实现打开 hover 浮窗、进入浮窗、关闭浮窗。`UserLspHover` 在 `WinEnter` 时根据浮窗的 `textDocument/hover` 标记添加局部关闭映射，避免第三次按键触发原生帮助查询；其他浮窗不受影响。
 - 光标停留时调用语言服务器高亮同一符号的引用。
 
 引用高亮不能用一个普通选项替代。标准方式就是监听 `CursorHold` 调用 `vim.lsp.buf.document_highlight()`，移动光标后清除引用。

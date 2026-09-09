@@ -29,6 +29,28 @@ return {
       -- cmp-nvim-lsp 默认已经包含 semantic tokens 的 capabilities
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
+      -- 第二次 K 进入 hover 浮窗后，第三次 K 关闭它，避免触发原生帮助查询。
+      vim.api.nvim_create_autocmd("WinEnter", {
+        group = vim.api.nvim_create_augroup("UserLspHover", { clear = true }),
+        callback = function()
+          local win = vim.api.nvim_get_current_win()
+          if vim.api.nvim_win_get_config(win).relative == ""
+            or not vim.w[win]["textDocument/hover"] then
+            return
+          end
+          vim.keymap.set("n", "K", function()
+            if vim.api.nvim_win_is_valid(win) then
+              vim.api.nvim_win_close(win, true)
+            end
+          end, {
+            buffer = vim.api.nvim_win_get_buf(win),
+            silent = true,
+            nowait = true,
+            desc = "Close hover",
+          })
+        end,
+      })
+
       -- 查找引用时不包含声明；若只有一个结果则直接跳转，多个结果再打开列表。
       local function smart_references()
         vim.lsp.buf.references({ includeDeclaration = false }, {
