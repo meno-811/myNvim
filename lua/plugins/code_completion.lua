@@ -69,66 +69,36 @@ return {
           { name = 'path' },
         }),
       })
-      -- ========== Cmdline 模式配置 nvim-cmp ==========
-      ----------------------------------------------------------------------
-      -- `/` 搜索模式：类似 zsh 的 buffer 补全
-      ----------------------------------------------------------------------
+      -- 命令行与插入模式保持相同的候选确认规则；无菜单时回退原生命令行按键。
+      local cmdline_mapping = {
+        ["<Tab>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.confirm({ select = true })
+          else
+            fallback()
+          end
+        end, { "c" }),
+        ["<CR>"] = cmp.mapping(function(fallback)
+          if cmp.visible() and cmp.get_selected_entry() then
+            cmp.confirm({ select = false })
+          else
+            fallback()
+          end
+        end, { "c" }),
+        ["<Down>"] = cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }), { "c" }),
+        ["<Up>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }), { "c" }),
+        ["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }), { "c" }),
+      }
+
       cmp.setup.cmdline("/", {
-        mapping = {
-          -- Tab：呼出补全 / 下一个候选项
-          ["<Tab>"] = function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            else
-              cmp.complete()
-            end
-          end,
-
-          -- Shift-Tab：上一个候选项
-          ["<S-Tab>"] = function()
-            if cmp.visible() then
-              cmp.select_prev_item()
-            end
-          end,
-
-          -- Enter：确认但不退出搜索
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-
-          -- 上下方向键：选择候选项（zsh 风格）
-          ["<Down>"] = cmp.mapping.select_next_item(),
-          ["<Up>"] = cmp.mapping.select_prev_item(),
-        },
-
+        mapping = cmdline_mapping,
         sources = {
           { name = "buffer" },
         },
       })
 
-      ----------------------------------------------------------------------
-      -- `:` 命令模式：zsh 风格 path + cmdline 补全
-      ----------------------------------------------------------------------
       cmp.setup.cmdline(":", {
-        mapping = {
-          ["<Tab>"] = function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            else
-              cmp.complete()
-            end
-          end,
-
-          ["<S-Tab>"] = function()
-            if cmp.visible() then
-              cmp.select_prev_item()
-            end
-          end,
-
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
-
-          ["<Down>"] = cmp.mapping.select_next_item(),
-          ["<Up>"] = cmp.mapping.select_prev_item(),
-        },
-
+        mapping = cmdline_mapping,
         sources = cmp.config.sources({
           { name = "path" },
         }, {

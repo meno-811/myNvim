@@ -24,6 +24,7 @@ return{
     -- bufferline.nvim  在顶部显示已打开文件的标签页（类似 VS Code 的标签栏），支持鼠标点击、图标显示、诊断标记等。
     {
         "akinsho/bufferline.nvim",
+        lazy = false, -- 启动即显示标签栏，避免 keys 使插件仅在首次切换时加载。
         dependencies = { "nvim-tree/nvim-web-devicons", "folke/snacks.nvim" },
         keys = function()
             local keys = {

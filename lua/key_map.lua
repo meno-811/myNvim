@@ -4,6 +4,17 @@ vim.g.maplocalleader = " "
 
 local map = vim.keymap.set
 
+-- D：打开当前行诊断，再按进入浮窗；浮窗内再按关闭并返回。
+map("n", "D", function()
+    local buf, win = vim.diagnostic.open_float({ scope = "line" })
+    if not buf or not win then return end
+    map("n", "D", function()
+        if vim.api.nvim_win_is_valid(win) then
+            vim.api.nvim_win_close(win, true)
+        end
+    end, { buffer = buf, silent = true, nowait = true, desc = "Close diagnostic float" })
+end, { silent = true, desc = "Show line diagnostics" })
+
 -- 窗口导航与大小调整。
 map("n", "<C-Left>", "<C-w>h", { desc = "Move to left split" })
 map("n", "<C-Down>", "<C-w>j", { desc = "Move to below split" })

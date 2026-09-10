@@ -1,6 +1,6 @@
 # Neovim 配置说明
 
-最后核对日期：2026-09-08
+最后核对日期：2026-09-09
 
 这份文档记录本项目当前的设计、各文件职责、关键实现取舍和快捷键风险。它既是配置索引，也是以后排查“这段代码为什么存在”的依据。
 
@@ -34,6 +34,7 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置。每个映射和�
 
 - 上下键在普通、插入和可视模式生效，仅对 `buftype` 为空的文本 buffer 启用边界行为。到达首尾行后再按一次才跳到行首尾；其他位置返回原生方向键。
 - 行首使用 `<Home>`，包含前导空格；行尾使用 `<End>`，遵循当前模式语义，插入模式停在最后一个字符之后。
+- 普通模式 `D`（Shift+d）调用原生 `vim.diagnostic.open_float({ scope = "line" })`：首次打开当前行诊断，第二次由原生浮窗聚焦机制进入；返回的浮窗 buffer 上设置局部 `D`，第三次关闭并返回代码。可在浮窗中选择、复制完整诊断，不依赖 LSP attach；当前行无诊断时不执行删除。
 - 插入模式 Ctrl+左右直接映射为 `<Home>` / `<End>`，保持插入模式；普通模式 Ctrl+方向键仍用于窗口导航。
 - 补全菜单可见时上下键保留候选项选择语义；nvim-cmp 未显示菜单时回退到原有映射。
 
@@ -61,6 +62,8 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置。每个映射和�
 ### `lua/plugins/status.lua`
 
 lualine、Bufferline 和用于关闭 buffer 的 Snacks 配置。标签切换、按编号跳转及关闭快捷键通过对应插件的 `keys` 注册。关闭行为由 `lua/utils/buffer.lua` 复用。
+
+Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件标签栏。只有 `keys` 而未指定加载时机时，lazy.nvim 会将其设为延迟加载，导致首次按 Tab 等标签快捷键后才显示；`always_show_bufferline` 只控制加载后的显示，不能触发插件加载。
 
 ### `lua/plugins/lsp.lua`
 
@@ -92,6 +95,7 @@ lualine、Bufferline 和用于关闭 buffer 的 Snacks 配置。标签切换、�
 ### 其他插件文件
 
 - `code_completion.lua`：nvim-cmp、LuaSnip 和命令行补全。
+- `:` 与 `/` 共用显式绑定到 `c` 模式的补全映射：Tab 确认选中项或首项，Enter 仅确认手动选中项，否则回退执行当前输入；上下键使用 `SelectBehavior.Select`，只选择、不立即插入，无菜单时回退历史导航。Tab 无菜单时回退原生按键，不调用 LuaSnip。
 - `none_ls.lua`：外部格式化器桥接。
 - `daps.lua`：Go/Python 调试器及 DAP UI。
 - `neo_tree.lua`：文件树及其内部操作。
@@ -138,7 +142,7 @@ lualine、Bufferline 和用于关闭 buffer 的 Snacks 配置。标签切换、�
 | `lua/plugins/git.lua` 的 LazyGit 退出刷新 | LazyGit 修改仓库后刷新 filesystem、git_status、diagnostics；Windows 上又关闭了 libuv watcher | lazygit.nvim 提供 `vim.g.lazygit_on_exit_callback` | **使用官方回调**，在 LazyGit 退出后直接刷新 Neo-tree |
 | `lua/plugins/breadcrumb.lua` 的启用判断 | 只在普通文件窗口显示 Dropbar，不占用 Neo-tree、Claude Code 或浮窗的 winbar | Dropbar 官方支持 `bar.enable` 函数 | **保留**。这已经是在使用插件原生选项 |
 | `lua/plugins/breadcrumb.lua` 的全局开关 | 动态关闭所有现有 winbar，重新开启时触发重新附着 | Dropbar 提供 `bar.enable`，但没有完整等价的全局 toggle API | **保留**。手工刷新是为了让已打开窗口立刻响应 |
-| `lua/plugins/code_completion.lua` 的 `<CR>`/`<Tab>` 回调 | Enter 只确认手动选中的候选；Tab 只跳 LuaSnip 占位符，不选择补全项 | nvim-cmp 通过 mapping 回调提供这类条件行为，没有一个布尔选项完全等价 | **保留**。这是明确的补全交互策略 |
+| `lua/plugins/code_completion.lua` 的 `<CR>`/`<Tab>` 回调 | 插入和命令行模式中 Enter 只确认手动选中的候选；Tab 确认选中项或首项，插入模式无菜单时才尝试 LuaSnip | nvim-cmp 通过 mapping 回调提供这类条件行为，没有一个布尔选项完全等价 | **保留**。这是明确的补全交互策略 |
 | `lua/plugins/ai_copilot.lua` 的 `Alt+l` | Copilot 不再占用 Tab，用户通过独立按键明确接受整条建议 | copilot.vim 支持关闭默认 Tab 映射并调用 `copilot#Accept()` | **保留**。插件专属映射留在插件配置中，且不会改变 Tab 的原有行为 |
 | `lua/key_map.lua` 的插入模式左右键 | 补全菜单显示时保持方向键语义；否则允许左右跨行 | Neovim 的 `whichwrap` 与表达式映射可实现；没有插件选项能同时表达这个条件 | **保留** |
 | `lua/autocmds.lua` 的插入/离开模式诊断切换 | 输入时隐藏 virtual text，离开输入模式恢复 | `update_in_insert` 只控制诊断更新时间，不控制是否显示已有 virtual text | **保留** |
@@ -163,6 +167,8 @@ lualine、Bufferline 和用于关闭 buffer 的 Snacks 配置。标签切换、�
 
 3. 插入模式 `<C-Left>` / `<C-Right>` 改为行首/行尾，覆盖原生按词移动。普通模式的同名按键继续用于窗口导航。
 
+4. 普通模式 `D`（Shift+d）覆盖原生删除到行尾，改为诊断浮窗的打开、进入、关闭操作。这是用户明确要求的覆盖；删除到行尾仍可使用 `d$`。
+
 ### 中优先级
 
 - 普通模式 `<C-d>` 和 `<C-f>` 被改为跳转列表后退/前进，覆盖原生半页向下和整页向下。
@@ -176,6 +182,7 @@ lualine、Bufferline 和用于关闭 buffer 的 Snacks 配置。标签切换、�
 - Neo-tree 的 `[b`、`]b`、`Y`、`O` 和 fuzzy finder 的 `<C-j>/<C-k>` 是插件窗口局部映射。
 - quickfix 中的 `<CR>` 只绑定到本次 LSP 引用结果 buffer。
 - Messages 和 README 浮窗中的 `q`/`Esc` 只绑定到各自 buffer。
+- 诊断浮窗中的 `D` 关闭映射只绑定到该诊断 buffer；`K` 的 hover 行为不变。
 - git-conflict 的 `co`、`ct`、`cb`、`c0`、`[x`、`]x` 只在检测到冲突的文件中建立。
 
 ## 当前功能边界
