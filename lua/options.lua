@@ -1,3 +1,7 @@
+-- SSH 中通过终端的 OSC 52 协议写入本机剪贴板。
+if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+    vim.g.clipboard = "osc52"
+end
 -- 原生编辑器选项，不依赖插件。
 local options = {
     number = true,

@@ -26,6 +26,8 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 ## 常用快捷键
 
 `<Leader>` 默认为空格。
+只有已配置的 Leader 组合键会执行操作；普通或可视模式下，`Space` 后跟未配置的可打印字符时整组按键作废。
+例如 `Space+i` 不会进入插入模式，`Space+a` 等待后续 AI 快捷键超时后也不会执行原生 `a`。
 
 顶部文件标签栏在启动时自动显示；普通模式下使用 `Tab` / `Shift+Tab` 切换到下一个 / 上一个文件。
 

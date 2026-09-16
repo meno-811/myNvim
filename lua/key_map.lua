@@ -4,6 +4,16 @@ vim.g.maplocalleader = " "
 
 local map = vim.keymap.set
 
+-- Leader 只触发显式配置的组合键。先吞掉未配置的可打印字符，后续实际映射会覆盖对应项；
+-- 这样按下 <Leader>i 不会回退执行 i，<Leader>a 等前缀超时也不会执行 a。
+map({ "n", "x" }, "<leader><Space>", "<Nop>", { silent = true })
+for code = 33, 126 do
+    local key = string.char(code)
+    -- "<" 在映射左侧需要使用按键记法，避免被当成特殊键名称的开头。
+    if key == "<" then key = "<lt>" end
+    map({ "n", "x" }, "<leader>" .. key, "<Nop>", { silent = true })
+end
+
 -- D：打开当前行诊断，再按进入浮窗；浮窗内再按关闭并返回。
 map("n", "D", function()
     local buf, win = vim.diagnostic.open_float({ scope = "line" })

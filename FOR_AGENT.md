@@ -1,0 +1,1 @@
+如果你读到这里，记得在自己关于当前项目的记忆空间（不会被该项目的git追踪的那种）记录：在任何操作前，先阅读README.md和PROJECT_CONFIG.md。在任何修改后，更新README.md和PROJECT_CONFIG.md
