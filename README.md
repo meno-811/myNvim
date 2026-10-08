@@ -19,7 +19,7 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 
 ## 配置分类
 
-- `lua/key_map.lua`：原生快捷键，包括 Ctrl+方向键跨单词/段落、Shift+方向键翻页/跳到行首尾，以及上下键在文件边界跳到行首尾。
+- `lua/key_map.lua`：原生快捷键，包括 Ctrl+h/j/k/l 跨单词/段落、Shift+方向键翻页/跳到行首尾，以及上下键在文件边界跳到行首尾。
 - `lua/options.lua`：原生编辑器选项。
 - `lua/autocmds.lua`：文件类型换行、插入模式诊断显示等事件行为。
 - `lua/commands.lua`：自定义命令及其浮窗局部快捷键。
@@ -38,6 +38,7 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `*` / `#` | 搜索光标下的单词并向后 / 向前跳转 |
 | `:noh` | 取消当前搜索高亮及滚动条搜索标记 |
 | `Ctrl+d` / `Ctrl+f` | 跳转列表后退 / 前进 |
+| `Ctrl+s` | 保存文件；在插入模式下保存后返回普通模式 |
 | `Shift+↑` / `Shift+↓`（普通、插入、可视模式） | 向上 / 向下翻页 |
 | `Shift+←` / `Shift+→`（普通、插入、可视模式） | 跳到行首 / 行尾 |
 | `<Leader>;` | 操作顶部路径导航栏 |
@@ -51,7 +52,8 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `<Leader>bo` | 仅保留当前标签页 |
 | `<Leader>e` | 打开或关闭文件树 |
 | `<Leader>1` 至 `<Leader>9` | 切换到对应编号的标签页 |
-| `Ctrl+h/j/k/l`（普通模式、Claude Code 终端） | 移动到左 / 下 / 上 / 右窗口 |
+| `Ctrl+w` 后按 `h/j/k/l`（普通模式） | 移动到左 / 下 / 上 / 右窗口 |
+| `Ctrl+h/j/k/l`（Claude Code 终端） | 移动到左 / 下 / 上 / 右窗口 |
 | `Ctrl+\` | 打开或关闭终端 |
 | `<Leader>m` | 在 Markdown 文件中切换实时渲染 |
 | `<Leader>?` | 查看当前缓冲区可用快捷键 |
@@ -66,8 +68,8 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | --- | --- |
 | `↑` | 普通、插入、可视模式：已在第一行时再按一次，到行首第 1 列 |
 | `↓` | 普通、插入、可视模式：已在最后一行时再按一次，到行尾 |
-| `Ctrl+←` / `Ctrl+→` | 普通、插入、可视模式：跳到上一个 / 下一个单词 |
-| `Ctrl+↑` / `Ctrl+↓` | 普通、插入、可视模式：跳到上一个 / 下一个段落 |
+| `Ctrl+h` / `Ctrl+l` | 普通、插入、可视模式：跳到上一个 / 下一个单词 |
+| `Ctrl+k` / `Ctrl+j` | 普通、插入、可视模式：跳到上一个 / 下一个段落 |
 | `←` / `→` | 插入模式：允许跨行移动 |
 
 上下键的边界行为仅用于普通文本 buffer；其他位置仍正常上下移动，补全菜单中的上下键仍用于选择候选项。行首包含缩进空格，不是第一个非空白字符。
