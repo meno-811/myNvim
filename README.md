@@ -12,12 +12,14 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 
 进入 Neovim 后可通过 `:Mason` 查看和安装语言服务器及外部工具。
 
+使用 `:Nvim` 会新建一个独立浮动终端，以 Neovim 配置根目录作为工作目录并在其中启动 Neovim，用于快速开始修改nvim的配置。
+
 使用 `:readme` 或 `:Readme` 可以在浮动窗口中查看这套 Neovim 配置的 README；按
 `q` 或 `Esc` 关闭窗口。
 
 ## 配置分类
 
-- `lua/key_map.lua`：原生快捷键，包括插入模式 Ctrl+左右到行首尾、上下键在文件边界跳到行首尾。
+- `lua/key_map.lua`：原生快捷键，包括 Ctrl+方向键跨单词/段落、Shift+方向键翻页/跳到行首尾，以及上下键在文件边界跳到行首尾。
 - `lua/options.lua`：原生编辑器选项。
 - `lua/autocmds.lua`：文件类型换行、插入模式诊断显示等事件行为。
 - `lua/commands.lua`：自定义命令及其浮窗局部快捷键。
@@ -36,7 +38,8 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `*` / `#` | 搜索光标下的单词并向后 / 向前跳转 |
 | `:noh` | 取消当前搜索高亮及滚动条搜索标记 |
 | `Ctrl+d` / `Ctrl+f` | 跳转列表后退 / 前进 |
-| `Shift+↑` / `Shift+↓` | 向上 / 向下翻页 |
+| `Shift+↑` / `Shift+↓`（普通、插入、可视模式） | 向上 / 向下翻页 |
+| `Shift+←` / `Shift+→`（普通、插入、可视模式） | 跳到行首 / 行尾 |
 | `<Leader>;` | 操作顶部路径导航栏 |
 | `Ctrl+v`（或 `Ctrl+q`） | 进入块可视模式 |
 | `gc` / `gcc` | 注释操作符 / 切换当前行注释 |
@@ -48,8 +51,7 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `<Leader>bo` | 仅保留当前标签页 |
 | `<Leader>e` | 打开或关闭文件树 |
 | `<Leader>1` 至 `<Leader>9` | 切换到对应编号的标签页 |
-| `Ctrl+方向键`（普通模式） | 移动到对应方向的窗口 |
-| `Ctrl+h/j/k/l` | 调整窗口大小 |
+| `Ctrl+h/j/k/l`（普通模式、Claude Code 终端） | 移动到左 / 下 / 上 / 右窗口 |
 | `Ctrl+\` | 打开或关闭终端 |
 | `<Leader>m` | 在 Markdown 文件中切换实时渲染 |
 | `<Leader>?` | 查看当前缓冲区可用快捷键 |
@@ -64,8 +66,8 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | --- | --- |
 | `↑` | 普通、插入、可视模式：已在第一行时再按一次，到行首第 1 列 |
 | `↓` | 普通、插入、可视模式：已在最后一行时再按一次，到行尾 |
-| `Ctrl+←` | 插入模式：到行首第 1 列，保持插入模式 |
-| `Ctrl+→` | 插入模式：到最后一个字符之后，保持插入模式 |
+| `Ctrl+←` / `Ctrl+→` | 普通、插入、可视模式：跳到上一个 / 下一个单词 |
+| `Ctrl+↑` / `Ctrl+↓` | 普通、插入、可视模式：跳到上一个 / 下一个段落 |
 | `←` / `→` | 插入模式：允许跨行移动 |
 
 上下键的边界行为仅用于普通文本 buffer；其他位置仍正常上下移动，补全菜单中的上下键仍用于选择候选项。行首包含缩进空格，不是第一个非空白字符。

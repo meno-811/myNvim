@@ -5,7 +5,9 @@ return {
         -- toggleterm.nvim  终端插件，用于在 Neovim 中打开终端窗口。
         "akinsho/toggleterm.nvim",
         config = function()
-            require("toggleterm").setup({
+            local toggleterm = require("toggleterm")
+            local Terminal = require("toggleterm.terminal").Terminal
+            toggleterm.setup({
                 size = 20,
                 open_mapping = [[<C-\>]], -- Ctrl+\ 打开/关闭终端
                 direction = "float",
@@ -28,6 +30,16 @@ return {
                     )
                 end,
             })
+
+            vim.api.nvim_create_user_command("Nvim", function()
+                local term = Terminal:new({
+                    dir = vim.fn.stdpath("config"),
+                    direction = "float",
+                    hidden = true,
+                })
+                term:open()
+                term:send("nvim", false)
+            end, { desc = "在终端中打开 Neovim 配置" })
         end,
     },
 }

@@ -30,12 +30,12 @@ Leader 必须在 lazy.nvim 解析插件快捷键之前设置。每个映射和�
 
 ### `lua/key_map.lua`
 
-原生快捷键和简短回调：窗口导航与缩放、保存与撤销、跳转列表、上下键在文件首尾行跳到行首尾、插入模式左右跨行，以及 Ctrl+左右到行首尾。直接使用 `vim.keymap.set`，不依赖 AstroCore。
+原生快捷键和简短回调：窗口导航、保存与撤销、跳转列表、上下键在文件首尾行跳到行首尾、插入模式左右跨行、Ctrl+方向键跨单词/段落，以及 Shift+方向键翻页/跳到行首尾。直接使用 `vim.keymap.set`，不依赖 AstroCore。
 
 - 上下键在普通、插入和可视模式生效，仅对 `buftype` 为空的文本 buffer 启用边界行为。到达首尾行后再按一次才跳到行首尾；其他位置返回原生方向键。
 - 行首使用 `<Home>`，包含前导空格；行尾使用 `<End>`，遵循当前模式语义，插入模式停在最后一个字符之后。
 - 普通模式 `D`（Shift+d）调用原生 `vim.diagnostic.open_float({ scope = "line" })`：首次打开当前行诊断，第二次由原生浮窗聚焦机制进入；返回的浮窗 buffer 上设置局部 `D`，第三次关闭并返回代码。可在浮窗中选择、复制完整诊断，不依赖 LSP attach；当前行无诊断时不执行删除。
-- 插入模式 Ctrl+左右直接映射为 `<Home>` / `<End>`，保持插入模式；普通模式 Ctrl+方向键仍用于窗口导航。
+- 普通、插入和可视模式使用 Ctrl+左右跨单词、Ctrl+上下跨段落、Shift+上下翻页、Shift+左右跳到行首行尾；插入模式通过单次普通模式命令移动后自动返回插入。普通模式使用 Ctrl+h/j/k/l 进行窗口导航。
 - 补全菜单可见时上下键保留候选项选择语义；nvim-cmp 未显示菜单时回退到原有映射。
 - Leader 采用严格组合键：普通和可视模式先将 `<Leader>` 后的单个可打印字符映射为 `<Nop>`，具体功能映射随后覆盖它们。因此未配置组合不会回退成原生单键命令，已配置的两键和多键 Leader 映射仍正常解析。
 
@@ -102,7 +102,7 @@ Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件
 - `neo_tree.lua`：文件树及其内部操作。
 - `git.lua`：Git 相关插件。
 - `status.lua`：lualine、Bufferline 外观及标签快捷键，Snacks 关闭 buffer 快捷键。
-- `term.lua`：ToggleTerm。
+- `term.lua`：ToggleTerm，以及新建独立浮动终端进入配置目录并启动 Neovim 的 `:Nvim` 命令。
 - `subject_skin.lua`：Catppuccin 主题。
 - `ai_claudecode.lua`：Claude Code IDE 集成。
 - `ai_copilotchat.lua`：Copilot Chat 备用配置；导入行当前保持注释，不会加载。
@@ -148,7 +148,7 @@ Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件
 | `lua/key_map.lua` 的插入模式左右键 | 补全菜单显示时保持方向键语义；否则允许左右跨行 | Neovim 的 `whichwrap` 与表达式映射可实现；没有插件选项能同时表达这个条件 | **保留** |
 | `lua/autocmds.lua` 的插入/离开模式诊断切换 | 输入时隐藏 virtual text，离开输入模式恢复 | `update_in_insert` 只控制诊断更新时间，不控制是否显示已有 virtual text | **保留** |
 | `lua/plugins/term.lua` 的 `Alt+n` | ToggleTerm 中从终端输入模式进入普通模式，保留 `Esc` 给交互程序 | ToggleTerm 官方文档建议为退出终端模式设置 buffer-local mapping | **保留** |
-| `lua/plugins/ai_claudecode.lua` 的 `Alt+n` 和窗口移动键 | Claude Code 终端中进入普通模式、跨窗口移动 | Claude Code 官方将 `snacks_win_opts` 透传给 Snacks window，并支持其中的 `keys` | **保留**。当前写法就是插件公开配置入口 |
+| `lua/plugins/ai_claudecode.lua` 的 `Alt+n` 和 Ctrl+h/j/k/l | Claude Code 终端中进入普通模式、跨窗口移动 | Claude Code 官方将 `snacks_win_opts` 透传给 Snacks window，并支持其中的 `keys` | **保留**。当前写法就是插件公开配置入口 |
 
 ## 快捷键风险
 
@@ -166,20 +166,22 @@ Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件
 
    当前用途是保存文件，这是已确认的 IDE 风格选择。签名帮助如以后需要，可另设按键。
 
-3. 插入模式 `<C-Left>` / `<C-Right>` 改为行首/行尾，覆盖原生按词移动。普通模式的同名按键继续用于窗口导航。
+3. `<C-Left>` / `<C-Right>` 和 `<C-Up>` / `<C-Down>` 在普通、插入、可视模式分别用于跨单词和跨段落移动。
 
-4. 普通模式 `D`（Shift+d）覆盖原生删除到行尾，改为诊断浮窗的打开、进入、关闭操作。这是用户明确要求的覆盖；删除到行尾仍可使用 `d$`。
+4. `<S-Up>` / `<S-Down>` 和 `<S-Left>` / `<S-Right>` 在普通、插入、可视模式分别用于翻页和跳到行首行尾。
+
+5. 普通模式 `D`（Shift+d）覆盖原生删除到行尾，改为诊断浮窗的打开、进入、关闭操作。这是用户明确要求的覆盖；删除到行尾仍可使用 `d$`。
 
 ### 中优先级
 
 - 普通模式 `<C-d>` 和 `<C-f>` 被改为跳转列表后退/前进，覆盖原生半页向下和整页向下。
-- 普通模式 `<C-h/j/k/l>` 用于调整窗口，覆盖部分原生控制键语义；窗口移动实际使用 `<C-Left/Down/Up/Right>`。README 中的描述需要与实际配置保持一致。
+- 普通模式 `<C-h/j/k/l>` 用于向左 / 下 / 上 / 右移动窗口，覆盖部分原生控制键语义；窗口缩放暂不设置快捷键。
 - `<Leader>b` 是 DAP 断点，同时也是 `<Leader>ba`/`<Leader>bo` 的前缀。它们能共存，但单独按 `<Leader>b` 时可能等待 `timeoutlen`。
 - `<C-S-z>` 在不同终端/键盘协议中不一定能与 `<C-z>` 区分，重做快捷键可能失效或被识别为撤销。
 
 ### 安全的局部覆盖
 
-- Claude Code 与 ToggleTerm 的 `<A-n>` 只在各自终端 buffer 的 terminal mode 生效。
+- Claude Code 的 `<C-h/j/k/l>` 与 Claude Code、ToggleTerm 的 `<A-n>` 只在各自终端 buffer 的 terminal mode 生效。
 - Neo-tree 的 `[b`、`]b`、`Y`、`O` 和 fuzzy finder 的 `<C-j>/<C-k>` 是插件窗口局部映射。
 - quickfix 中的 `<CR>` 只绑定到本次 LSP 引用结果 buffer。
 - Messages 和 README 浮窗中的 `q`/`Esc` 只绑定到各自 buffer。
