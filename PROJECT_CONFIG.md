@@ -102,7 +102,7 @@ Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件
 - `neo_tree.lua`：文件树及其内部操作。
 - `git.lua`：Git 相关插件。
 - `status.lua`：lualine、Bufferline 外观及标签快捷键，Snacks 关闭 buffer 快捷键。
-- `term.lua`：ToggleTerm，以及新建独立浮动终端进入配置目录并启动 Neovim 的 `:Nvim` 命令。
+- `term.lua`：ToggleTerm，以及像 `:TermNew` 一样新建普通浮动终端、进入配置目录并启动 Neovim 的 `:Nvim` 命令；新会话参与 `Ctrl+\` 和 `:TermSelect` 的终端管理。
 - `subject_skin.lua`：Catppuccin 主题。
 - `ai_claudecode.lua`：Claude Code IDE 集成。
 - `ai_copilotchat.lua`：Copilot Chat 备用配置；导入行当前保持注释，不会加载。

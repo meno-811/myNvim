@@ -35,7 +35,6 @@ return {
                 local term = Terminal:new({
                     dir = vim.fn.stdpath("config"),
                     direction = "float",
-                    hidden = true,
                 })
                 term:open()
                 term:send("nvim", false)
