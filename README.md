@@ -19,7 +19,7 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 
 ## 配置分类
 
-- `lua/key_map.lua`：原生快捷键，包括 Ctrl+h/j/k/l 跨单词/段落、Shift+方向键翻页/跳到行首尾，以及上下键在文件边界跳到行首尾。
+- `lua/key_map.lua`：原生快捷键，包括 Ctrl+h/j/k/l 和 Ctrl+方向键跨单词/段落、Shift+方向键翻页/跳到行首尾，以及上下键在文件边界跳到行首尾。
 - `lua/options.lua`：原生编辑器选项。
 - `lua/autocmds.lua`：文件类型换行、插入模式诊断显示等事件行为。
 - `lua/commands.lua`：自定义命令及其浮窗局部快捷键。
@@ -53,7 +53,8 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `<Leader>e` | 打开或关闭文件树 |
 | `<Leader>1` 至 `<Leader>9` | 切换到对应编号的标签页 |
 | `Ctrl+w` 后按 `h/j/k/l`（普通模式） | 移动到左 / 下 / 上 / 右窗口 |
-| `Ctrl+h/j/k/l`（Claude Code 终端） | 移动到左 / 下 / 上 / 右窗口 |
+| 按住 `Ctrl`，依次按 `w` 和 `h/j/k/l`（Claude Code 终端） | 移动到左 / 下 / 上 / 右窗口 |
+| 按住 `Ctrl`，连按两次 `w`（Claude Code 终端） | 切换到下一个窗口 |
 | `Ctrl+\` | 打开或关闭终端 |
 | `<Leader>m` | 在 Markdown 文件中切换实时渲染 |
 | `<Leader>?` | 查看当前缓冲区可用快捷键 |
@@ -70,11 +71,24 @@ git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 | `↓` | 普通、插入、可视模式：已在最后一行时再按一次，到行尾 |
 | `Ctrl+h` / `Ctrl+l` | 普通、插入、可视模式：跳到上一个 / 下一个单词 |
 | `Ctrl+k` / `Ctrl+j` | 普通、插入、可视模式：跳到上一个 / 下一个段落 |
+| `Ctrl+←` / `Ctrl+→` | 同 `Ctrl+h` / `Ctrl+l` |
+| `Ctrl+↑` / `Ctrl+↓` | 同 `Ctrl+k` / `Ctrl+j` |
 | `←` / `→` | 插入模式：允许跨行移动 |
 
 上下键的边界行为仅用于普通文本 buffer；其他位置仍正常上下移动，补全菜单中的上下键仍用于选择候选项。行首包含缩进空格，不是第一个非空白字符。
 
 Lua、Python、JavaScript、Go、Rust 文件关闭自动折行；Markdown、text、vimwiki 开启友好折行。这只改变显示，不会插入换行符。进入插入模式时隐藏诊断文字，离开时恢复；错误标记和下划线仍保留。
+
+## 操作笔记
+
+### 多行插入相同内容
+
+1. 按 `Ctrl+v`（终端占用时可用 `Ctrl+q`）进入块可视模式。
+2. 用 `j` / `k` 选中多行。
+3. 按大写 `I`（`Shift+i`），输入要插入的内容。
+4. 按 `Esc`，内容会同时应用到所有选中行。
+
+按 `I` 后显示普通的 `-- INSERT --` 是正常现象；输入时通常只能在第一行看到内容，最后按 `Esc` 才会将它复制到其他选中行。
 
 ## 代码补全
 
