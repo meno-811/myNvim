@@ -31,14 +31,13 @@ return {
                 end,
             })
 
-            vim.api.nvim_create_user_command("Nvim", function()
+            vim.api.nvim_create_user_command("Config", function()
                 local term = Terminal:new({
                     dir = vim.fn.stdpath("config"),
                     direction = "float",
                 })
                 term:open()
-                term:send("nvim", false)
-            end, { desc = "在终端中打开 Neovim 配置" })
+            end, { desc = "在终端中进入 Neovim 配置目录" })
         end,
     },
 }

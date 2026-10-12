@@ -96,7 +96,7 @@ Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件
 
 ### 其他插件文件
 
-- `install-nvim.sh`：在 x86_64 Linux 上下载最新 Neovim AppImage，并原子替换 `/usr/bin/nvim`；重复运行即可更新，已运行的旧进程不受影响。
+- `install-nvim.sh`：自动识别 x86_64 或 ARM64 Linux，下载对应的最新 Neovim AppImage，并原子替换 `/usr/bin/nvim`；重复运行即可更新，已运行的旧进程不受影响。
 - `code_completion.lua`：nvim-cmp、LuaSnip 和命令行补全。
 - `:` 与 `/` 共用显式绑定到 `c` 模式的补全映射：Tab 确认选中项或首项，Enter 仅确认手动选中项，否则回退执行当前输入；上下键使用 `SelectBehavior.Select`，只选择、不立即插入，无菜单时回退历史导航。Tab 无菜单时回退原生按键，不调用 LuaSnip。
 - `none_ls.lua`：外部格式化器桥接。
@@ -104,7 +104,7 @@ Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件
 - `neo_tree.lua`：文件树及其内部操作。
 - `git.lua`：Git 相关插件。
 - `status.lua`：lualine、Bufferline 外观及标签快捷键，Snacks 关闭 buffer 快捷键。
-- `term.lua`：ToggleTerm，以及像 `:TermNew` 一样新建普通浮动终端、进入配置目录并启动 Neovim 的 `:Nvim` 命令；新会话参与 `Ctrl+\` 和 `:TermSelect` 的终端管理。
+- `term.lua`：ToggleTerm，以及像 `:TermNew` 一样新建普通浮动终端并进入配置目录的 `:Config` 命令；新会话参与 `Ctrl+\` 和 `:TermSelect` 的终端管理。
 - `subject_skin.lua`：Catppuccin 主题。
 - `ai_claudecode.lua`：Claude Code IDE 集成。
 - `ai_copilotchat.lua`：Copilot Chat 备用配置；导入行当前保持注释，不会加载。

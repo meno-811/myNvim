@@ -10,7 +10,7 @@
 git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
 ```
 
-在 x86_64 Linux 上进入项目根目录后，可安装或更新最新 AppImage 到 `/usr/bin/nvim`：
+在 x86_64 或 ARM64 Linux 上进入项目根目录后，可自动识别架构并安装或更新最新 AppImage 到 `/usr/bin/nvim`：
 
 ```bash
 cd ~/.config/nvim
@@ -19,7 +19,7 @@ bash ./install-nvim.sh
 
 进入 Neovim 后可通过 `:Mason` 查看和安装语言服务器及外部工具。
 
-使用 `:Nvim` 会新建一个独立浮动终端，以 Neovim 配置根目录作为工作目录并在其中启动 Neovim，用于快速开始修改nvim的配置；该会话可用 `Ctrl+\` 关闭，并通过 `:TermSelect` 再次选择。
+使用 `:Config` 会新建一个独立浮动终端，并进入 Neovim 配置根目录；该会话可用 `Ctrl+\` 关闭，并通过 `:TermSelect` 再次选择。
 
 使用 `:readme` 或 `:Readme` 可以在浮动窗口中查看这套 Neovim 配置的 README；按
 `q` 或 `Esc` 关闭窗口。
