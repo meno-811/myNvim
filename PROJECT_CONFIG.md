@@ -1,6 +1,6 @@
 # Neovim 配置说明
 
-最后核对日期：2026-09-09
+最后核对日期：2026-10-12
 
 这份文档记录本项目当前的设计、各文件职责、关键实现取舍和快捷键风险。它既是配置索引，也是以后排查“这段代码为什么存在”的依据。
 
@@ -96,6 +96,7 @@ Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件
 
 ### 其他插件文件
 
+- `install-nvim.sh`：在 x86_64 Linux 上下载最新 Neovim AppImage，并原子替换 `/usr/bin/nvim`；重复运行即可更新，已运行的旧进程不受影响。
 - `code_completion.lua`：nvim-cmp、LuaSnip 和命令行补全。
 - `:` 与 `/` 共用显式绑定到 `c` 模式的补全映射：Tab 确认选中项或首项，Enter 仅确认手动选中项，否则回退执行当前输入；上下键使用 `SelectBehavior.Select`，只选择、不立即插入，无菜单时回退历史导航。Tab 无菜单时回退原生按键，不调用 LuaSnip。
 - `none_ls.lua`：外部格式化器桥接。
