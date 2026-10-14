@@ -29,8 +29,25 @@ map("n", "<C-d>", "<C-o>", { desc = "Jump backward" })
 map("n", "<C-f>", "<C-i>", { desc = "Jump forward" })
 map({ "n", "x" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save file" })
 map("i", "<C-s>", "<Esc><Cmd>write<CR>", { desc = "Save file and leave insert mode" })
+map({ "n", "x" }, "<C-a>", "ggVG", { desc = "Select all" })
+map("i", "<C-a>", "<Esc>ggVG", { desc = "Select all" })
+map("x", "<C-c>", '"+y', { desc = "Copy selection" })
 map({ "n", "i" }, "<C-z>", "<Cmd>undo<CR>", { desc = "Undo" })
 map({ "n", "i" }, "<C-S-z>", "<Cmd>redo<CR>", { desc = "Redo" })
+map("i", "<C-w>", "<Nop>", { desc = "Window command prefix" })
+for key, direction in pairs {
+    h = "h", j = "j", k = "k", l = "l", w = "w",
+    ["<C-h>"] = "h", ["<C-j>"] = "j", ["<C-k>"] = "k", ["<C-l>"] = "l", ["<C-w>"] = "w",
+    ["<Left>"] = "h", ["<Down>"] = "j", ["<Up>"] = "k", ["<Right>"] = "l",
+} do
+    map("i", "<C-w>" .. key, "<Esc><C-w>" .. direction, { desc = "Leave insert mode and move window" })
+end
+map("n", "<2-LeftMouse>", "<LeftMouse>i", { desc = "Enter insert mode at mouse position" })
+map("i", "<LeftMouse>", function()
+    local winid = vim.fn.getmousepos().winid
+    return winid ~= 0 and winid ~= vim.api.nvim_get_current_win()
+        and "<Esc><LeftMouse>" or "<LeftMouse>"
+end, { expr = true, desc = "Leave insert mode when clicking another window" })
 
 -- 仅文本 buffer 在首尾行追加 Home/End 行为；其他位置保留原生移动。
 for key, boundary in pairs { ["<Up>"] = "<Home>", ["<Down>"] = "<End>" } do
