@@ -1,238 +1,157 @@
-# Neovim 配置说明
+# Neovim 配置维护说明
+
+最后核对日期：2026-10-14
+
+本文只记录当前结构、设计取舍、已确认行为和排错结论，不充当变更日志。面向用户的安装与操作说明放在 `README.md`。
+
+## 总体结构
+
+这是独立的 Neovim 0.12+ 配置，不是完整 AstroNvim 发行版。lazy.nvim 管理插件；AstroCore 只提供诊断基础配置和新版 Treesitter 适配。
+
+启动顺序固定为：
+
+1. `options.lua`：原生选项。
+2. `key_map.lua`：Leader 与原生快捷键。
+3. `autocmds.lua`：编辑器级事件。
+4. `commands.lua`：用户命令。
+5. `plugins/init.lua`：lazy.nvim 与插件模块。
+
+Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim API；插件设置、延迟加载入口和插件局部快捷键留在对应插件文件中，避免重复定义。
+
+## 文件职责
+
+| 文件 | 职责 |
+| --- | --- |
+| `init.lua` | 按固定顺序加载配置 |
+| `lua/options.lua` | 行号、缩进、搜索、鼠标、剪贴板、`virtualedit`、`whichwrap` 等原生选项 |
+| `lua/key_map.lua` | 严格 Leader、编辑/导航/窗口快捷键、诊断浮窗和鼠标交互 |
+| `lua/autocmds.lua` | 外部文件检查、文件类型折行、插入模式诊断文字切换 |
+| `lua/commands.lua` | `MessagesBuffer`、`Readme` 及浮窗局部行为 |
+| `lua/utils/buffer.lua` | 基于 Snacks 的安全 buffer 关闭 |
+| `lua/plugins/astrocore.lua` | 诊断基础配置与 Treesitter 适配 |
+| `lua/plugins/lsp.lua` | Mason、LSP 配置、LspAttach 映射、hover 和引用行为 |
+| `lua/plugins/code_completion.lua` | nvim-cmp、LuaSnip、插入与命令行补全 |
+| `lua/plugins/none_ls.lua` | stylua、black、shfmt 外部格式化 |
+| `lua/plugins/status.lua` | lualine、Bufferline、Snacks 关闭入口 |
+| `lua/plugins/neo_tree.lua` | 文件树、路径复制、系统打开和 source 切换 |
+| `lua/plugins/breadcrumb.lua` | Dropbar 路径栏及动态开关 |
+| `lua/plugins/scrollbar.lua` | 诊断、搜索和 LSP 引用滚动条标记 |
+| `lua/plugins/term.lua` | ToggleTerm 与 `:Config` |
+| `lua/plugins/ai_claudecode.lua` | Claude Code 终端、上下文发送、diff 审阅和终端窗口导航 |
+| `lua/plugins/ai_copilot.lua` | Copilot 行内建议；不占用 Tab |
+| `lua/plugins/ai_copilotchat.lua` | 未导入的备用方案 |
+| `lua/plugins/daps.lua` | Go/Python DAP 与 dap-ui |
+| `lua/plugins/git.lua` | gitsigns、LazyGit、git-conflict |
+| `lua/plugins/markdown.lua` | Markdown 终端内渲染 |
+| `install-nvim.sh` | 按 Linux 架构安装或更新 Neovim AppImage |
+
+插件专属快捷键可以留在 spec 的 `keys` 或 `config` 中。例如 `<Leader>e` 同时是 Neo-tree 的延迟加载入口，移到全局映射会破坏按需加载。
 
-最后核对日期：2026-10-12
+## 已确认的交互
 
-这份文档记录本项目当前的设计、各文件职责、关键实现取舍和快捷键风险。它既是配置索引，也是以后排查“这段代码为什么存在”的依据。
+### 原生编辑器层
 
-## 设计目标
+- Leader 是空格。普通和可视模式先吞掉未配置的单个可打印组合，实际映射再覆盖，因此 `Space+i` 不会回退执行原生 `i`，`Space+a` 超时也不会执行原生 `a`。
+- `Ctrl+a` 在普通、插入、可视模式全选；可视模式 `Ctrl+c` 写入系统 `+` 剪贴板；`Ctrl+s` 保存，插入模式会先退出。
+- `Ctrl+h/l` 与 `Ctrl+左右` 跨单词，`Ctrl+k/j` 与 `Ctrl+上下` 跨段落；`Shift+上下` 翻页，`Shift+左右` 到行首尾。
+- 文本 buffer 在首行继续按 `↑` 到第 1 列，在末行继续按 `↓` 到行尾。补全菜单可见或 `buftype` 非空时保留原生方向键行为。
+- 插入模式左右键可跨行；块选择通过 `virtualedit=block,onemore` 支持越过短行行尾。
+- 普通模式双击左键在点击位置进入插入模式。插入模式点击另一窗口时先退出插入，防止 Neo-tree 继承插入模式或 Claude 直接进入终端输入模式。
+- 普通模式 `D` 打开当前行诊断，第二次进入浮窗，浮窗内第三次关闭；无诊断时不执行原生删除。
+- 普通模式使用原生 `Ctrl+w` 窗口命令。插入模式把 `Ctrl+w` 改为窗口前缀，后接 `h/j/k/l`、对应 Ctrl 组合、方向键或 `w` 时先退出插入再移动。
 
-项目目前主要面向 Go、Python 和 Lua 开发。配置采用以下分工：
+### 自动命令
 
-- 原生配置按快捷键、选项、自动命令和用户命令分类；AstroCore 保留诊断基础配置和 Treesitter 适配。
-- lazy.nvim 管理插件的安装与加载。
-- 各插件文件管理该插件自己的设置和专属快捷键；需要触发延迟加载的快捷键通过插件 `keys` 注册。
-- LSP 文件保留语言服务器配置及只在 LSP attach 后有效的 buffer 局部行为。
+`user_editor` augroup 每次加载先清空，当前包含：
 
-这并不等于使用完整 AstroNvim 发行版。项目仍然是独立的 Neovim 配置，只复用 `astrocore` 提供的配置框架和通用工具。
+| 事件 | 行为 |
+| --- | --- |
+| `FocusGained`、`BufEnter`、`CursorHold` | `checktime` 检查磁盘变化；只有无本地未保存修改的文件会按 `autoread` 重载 |
+| 代码文件 `FileType` | Lua、Python、JavaScript、Go、Rust 关闭折行 |
+| 文本文件 `FileType` | Markdown、text、vimwiki 开启 `wrap` 和 `linebreak` |
+| `InsertEnter` / `InsertLeave` | 输入时隐藏诊断 virtual text，离开后恢复；标记和下划线始终保留 |
 
-## 启动流程
+### 补全
 
-1. `init.lua` 加载 `options.lua`，设置原生选项。
-2. 加载 `key_map.lua`，设置 Leader 和原生快捷键。
-3. 加载 `autocmds.lua`，注册原生事件行为。
-4. 加载 `commands.lua`，注册自定义用户命令。
-5. 加载 `plugins`，由 lazy.nvim 加载各插件及其专属快捷键。
-6. AstroCore 应用诊断基础配置和 Treesitter 适配。
+- nvim-cmp 使用 `noselect`：`Tab` 接受当前项或首项，`Enter` 只确认手动选中的候选，否则换行。
+- `↑/↓` 只改变候选选择，不立即插入；菜单可见时 `Esc` 只关闭菜单并保持插入模式。
+- `:` 和 `/` 复用同一确认规则；无菜单时回退 Neovim 的命令行历史、补全和执行行为。
+- Copilot 默认 Tab 映射关闭，只有 `Alt+l` 接受整条建议。
 
-Leader 必须在 lazy.nvim 解析插件快捷键之前设置。每个映射和选项只在所属文件定义一次。
+### LSP、诊断与滚动条
 
-## 核心配置位置
+- Mason 安装 `gopls`、`pyright`、`lua_ls`、`rust_analyzer`。Python 由 Pyright 诊断、Black 格式化；Go 只用 gopls 格式化，避免重复 provider。
+- `K` 三阶段为打开 hover、进入浮窗、关闭；关闭映射只挂在带 `textDocument/hover` 标记的浮窗。
+- `gr` 不包含声明：0 个结果提示，1 个直接跳转，多个进入 quickfix，回车跳转后关闭列表。
+- 支持 documentHighlight 的 LSP 在 `CursorHold` 高亮语义引用，移动时清除；滚动条读取引用 extmark。搜索滚动条使用 nvim-scrollbar 与 hlslens 官方集成。
+- `render-markdown.nvim` 只做终端内视觉渲染，不提供浏览器式字号、布局和图片能力。
 
-### `lua/key_map.lua`
+### Buffer、文件树与 Git
 
-原生快捷键和简短回调：保存与撤销、跳转列表、上下键在文件首尾行跳到行首尾、插入模式左右跨行、Ctrl+h/j/k/l 和 Ctrl+方向键跨单词/段落，以及 Shift+方向键翻页/跳到行首尾。直接使用 `vim.keymap.set`，不依赖 AstroCore。窗口导航使用 Neovim 原生 `Ctrl+w` 后接 `h/j/k/l`。
+- Bufferline `lazy=false`，启动即显示；仅有 `keys` 会导致首次按 Tab 后才加载，`always_show_bufferline` 不能替代加载时机。
+- 独立 AstroCore 不初始化完整 AstroNvim 的 `vim.t.bufs`，所以 buffer 关闭统一使用 `Snacks.bufdelete({ wipe=true })`。它负责未保存提示、替代 buffer 和窗口布局。
+- `<Leader>q` 在普通文件中删除当前 buffer，在 quickfix/location-list 中关闭结果窗口；`:q` 仍是 Neovim 原义。Neo-tree 成为最后一个窗口时不退出 Neovim。
+- Neo-tree 的 `Y` 复制名称、相对/绝对路径或 URI；这与插件的文件复制队列不是同一功能。`O`/`Shift+Enter` 使用 `vim.ui.open()`。
+- Windows 关闭 Neo-tree 的 libuv watcher；LazyGit 退出后通过插件官方回调刷新已加载的 filesystem、git_status、diagnostics source。
+- Dropbar 只占普通文件窗口的 winbar，不进入 Neo-tree、Claude Code 或浮窗；全局开关会同步刷新已经打开的窗口。
 
-- 上下键在普通、插入和可视模式生效，仅对 `buftype` 为空的文本 buffer 启用边界行为。到达首尾行后再按一次才跳到行首尾；其他位置返回原生方向键。
-- 行首使用 `<Home>`，包含前导空格；行尾使用 `<End>`，遵循当前模式语义，插入模式停在最后一个字符之后。
-- 普通模式 `D`（Shift+d）调用原生 `vim.diagnostic.open_float({ scope = "line" })`：首次打开当前行诊断，第二次由原生浮窗聚焦机制进入；返回的浮窗 buffer 上设置局部 `D`，第三次关闭并返回代码。可在浮窗中选择、复制完整诊断，不依赖 LSP attach；当前行无诊断时不执行删除。
-- `Ctrl+s` 在普通和可视模式下保存文件；在插入模式下先返回普通模式，再保存文件。
-- 普通、插入和可视模式使用 Ctrl+h/l 或 Ctrl+左右跨单词、Ctrl+k/j 或 Ctrl+上下跨段落、Shift+上下翻页、Shift+左右跳到行首行尾；插入模式通过单次普通模式命令移动后自动返回插入。普通模式窗口导航使用原生 Ctrl+w 后接 h/j/k/l。
-- 补全菜单可见时上下键保留候选项选择语义；nvim-cmp 未显示菜单时回退到原有映射。
-- Leader 采用严格组合键：普通和可视模式先将 `<Leader>` 后的单个可打印字符映射为 `<Nop>`，具体功能映射随后覆盖它们。因此未配置组合不会回退成原生单键命令，已配置的两键和多键 Leader 映射仍正常解析。
+### 终端与 Claude Code
 
-### `lua/options.lua`
+- ToggleTerm 的 `Alt+n` 从终端输入模式进入普通模式，保留 `Esc` 给终端程序。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
+- Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
+- Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航；`Alt+n` 进入终端普通模式。
+- Claude 窗口里的 `<Leader>q` 调用窗口 `hide()`，保留 Claude 进程和 WebSocket；不要用删除 terminal buffer 代替隐藏。
 
-行号、缩进、搜索、剪贴板、鼠标、滚动边距、`virtualedit` 和 `whichwrap` 等原生选项。
+## 保留的定制与理由
 
-### `lua/autocmds.lua`
+| 实现 | 理由 |
+| --- | --- |
+| `MessagesBuffer` | 必须显示完整 `:messages`；Snacks 通知历史不保证包含 `nvim_echo` 和命令输出 |
+| LSP `smart_references()` | Neovim 的 `on_list` 是官方扩展点，当前 0/1/多结果交互与通用 Picker 不同 |
+| LSP 引用滚动条 handler | nvim-scrollbar 没有 document-highlight handler；文本搜索会混入同名非语义结果 |
+| Neo-tree `copy_selector` / `system_open` | 插件没有等价的“复制路径文本”命令；`vim.ui.open()` 已是最小跨平台方案 |
+| Dropbar 动态开关 | `bar.enable` 能控制新附着，但没有让现有窗口立即同步的完整 toggle API |
+| cmp 条件映射 | 插件没有单一选项表达“Tab 选首项、Enter 仅确认手选项、无菜单回退” |
+| Claude Code 终端键 | `snacks_win_opts.keys` 是插件公开入口，映射保持在该终端局部 |
 
-代码文件关闭换行，文本文件开启友好换行；进入插入模式隐藏诊断文字，离开时恢复。使用命名 augroup 防止重新加载时重复注册。
+## 有意覆盖与兼容风险
 
-| 事件 | 匹配范围 | 行为 |
-| --- | --- | --- |
-| `FileType` | lua、python、javascript、go、rust | 设置窗口 `wrap = false` |
-| `FileType` | markdown、text、vimwiki | 设置窗口 `wrap = true`、`linebreak = true` |
-| `InsertEnter` | 全局 | 设置诊断 `virtual_text = false` |
-| `InsertLeave` | 全局 | 设置诊断 `virtual_text = true` |
+- `D` 覆盖删除到行尾；需要原行为时用 `d$`。
+- 普通模式 `Ctrl+a` 覆盖数字递增，`Ctrl+x` 的递减仍保留；可视模式原生的 `g<C-a>` / `g<C-x>` 序列递增/递减仍可使用，但需以实际终端按键传输为准。
+- 插入模式 `Ctrl+w` 覆盖“删除前一个单词”。
+- `Ctrl+d/f` 覆盖半页向下/整页向下，改为跳转列表后退/前进。
+- 插入模式 `Ctrl+s` 覆盖 Neovim 0.12 默认 LSP signature help。
+- `gr` 使用 `nowait=true`，会遮蔽 Neovim 0.12 的 `gra/gri/grn/grr/grt/grx`。项目另有 `gi`、`<Leader>rn`、`<Leader>ca`，但 `grt/grx` 不可达。
+- `<Leader>b` 同时是 DAP 断点和 `<Leader>ba/bo` 前缀，单独使用可能等待 `timeoutlen`。
+- `Ctrl+Shift+z`、`Shift+Enter` 等组合是否可区分取决于终端和键盘协议；无法区分时 Neovim 收不到独立按键码。
+- 鼠标、Claude、Neo-tree、诊断/hover 浮窗和 quickfix 的特殊映射均限制在相应模式或 buffer，不能提升成全局映射。
 
-折行仅改变显示，不修改文件内容。诊断切换只控制行旁文字，不关闭诊断检查、标记或下划线。上述规则使用 `user_editor` 分组，重新加载时清除旧注册。LSP 等插件专属事件仍留在对应插件文件中。
+## 环境与排错结论
 
-### `lua/plugins/astrocore.lua`
+### 字体与远程环境
 
-仅保留诊断基础配置和 Treesitter 的解析器、高亮、缩进及文本对象适配。
+- nvim-web-devicons 需要 Nerd Font 3.3+。终端 Neovim 的字体由本地终端控制，`guifont` 不生效；WSL/SSH 也应配置连接端的终端字体。
+- SSH 中 `options.lua` 将剪贴板 provider 设为 OSC 52，支持远端 Neovim 复制到本机剪贴板。反向粘贴通常由终端完成；tmux/screen 还需允许 OSC 52 透传。
+- `install-nvim.sh` 将 `x86_64/amd64` 映射到 x86_64 AppImage，将 `aarch64/arm64` 映射到 arm64；其他架构直接报错。脚本用临时文件和原子替换更新 `/usr/bin/nvim`。
 
-### `lua/plugins/status.lua`
+### DAP UI 报 nvim-nio 缺失
 
-lualine、Bufferline 和用于关闭 buffer 的 Snacks 配置。标签切换、按编号跳转及关闭快捷键通过对应插件的 `keys` 注册。关闭行为由 `lua/utils/buffer.lua` 复用。
+`daps.lua` 已把 `nvim-neotest/nvim-nio` 声明为 `nvim-dap-ui` 的直接依赖，`lazy-lock.json` 也有记录。dap-ui 用 `pcall(require, "nio")` 把所有加载失败统一报告为“未安装”，所以必须先看原始错误：
 
-Bufferline 显式设置 `lazy = false`，启动时即加载并显示顶部文件标签栏。只有 `keys` 而未指定加载时机时，lazy.nvim 会将其设为延迟加载，导致首次按 Tab 等标签快捷键后才显示；`always_show_bufferline` 只控制加载后的显示，不能触发插件加载。
+```vim
+:lua local ok, result = pcall(require, "nio"); print(ok, result)
+```
 
-### `lua/plugins/lsp.lua`
+2026-09-08 的受限无界面测试中，真实原因是 `nio/logger.lua` 无权创建 `nio.log`；切换到可写临时日志目录后 `nio` 和 `dapui` 均可加载。这属于测试环境写入限制，不应重复添加依赖或改变归属。
 
-负责真正属于 LSP 生命周期的内容：
+### Claude Code WebSocket `ECONNRESET`
 
-- Mason 安装 `gopls`、`pyright` 和 `lua_ls`。
-- 三种语言服务器的设置。
-- LSP attach 后才建立的 buffer 局部快捷键。
-- `K` 连续按实现打开 hover 浮窗、进入浮窗、关闭浮窗。`UserLspHover` 在 `WinEnter` 时根据浮窗的 `textDocument/hover` 标记添加局部关闭映射，避免第三次按键触发原生帮助查询；其他浮窗不受影响。
-- 光标停留时调用语言服务器高亮同一符号的引用。
+该消息表示 WebSocket 对端重置连接，通常是 Claude 客户端/终端被关闭、重启或连接中断，不等同于 Markdown 选择操作本身出错。当前关闭路径使用 `hide()` 保留会话；若持续刷屏，先重新打开 Claude Code，并用 `:MessagesBuffer` 查看最早一条错误，而不是只看重复尾部。
 
-引用高亮不能用一个普通选项替代。标准方式就是监听 `CursorHold` 调用 `vim.lsp.buf.document_highlight()`，移动光标后清除引用。
+## 检查入口与待验证项
 
-### `lua/plugins/treesitter.lua`
+- `:checkhealth astrocore`、`:checkhealth nvim-treesitter`、`:Lazy`、`:Mason`、`:LspInfo`。
+- 修改配置后至少执行无界面启动检查；涉及 UI 或终端键时再做交互验证。
+- 尚需实际体验验证：hlslens 搜索滚动条、Snacks 对多个未保存 buffer 的提示、LazyGit 退出后的 Neo-tree 即时刷新。
 
-只声明新版 `nvim-treesitter` 和 `nvim-treesitter-textobjects` 插件本身。
-
-当前使用 `main` 分支，该分支不支持延迟加载。功能启用和解析器安装由 AstroCore 的适配层负责。当前启用的函数和类文本对象包括：
-
-- `af`：函数整体。
-- `if`：函数内部。
-- `ac`：类整体。
-- `ic`：类内部。
-
-### `lua/commands.lua`
-
-注册 `MessagesBuffer`、`Readme` 等自定义用户命令及其浮窗局部快捷键，使用户命令与插件管理逻辑相互独立。
-
-### 其他插件文件
-
-- `install-nvim.sh`：自动识别 x86_64 或 ARM64 Linux，下载对应的最新 Neovim AppImage，并原子替换 `/usr/bin/nvim`；重复运行即可更新，已运行的旧进程不受影响。
-- `code_completion.lua`：nvim-cmp、LuaSnip 和命令行补全。
-- `:` 与 `/` 共用显式绑定到 `c` 模式的补全映射：Tab 确认选中项或首项，Enter 仅确认手动选中项，否则回退执行当前输入；上下键使用 `SelectBehavior.Select`，只选择、不立即插入，无菜单时回退历史导航。Tab 无菜单时回退原生按键，不调用 LuaSnip。
-- `none_ls.lua`：外部格式化器桥接。
-- `daps.lua`：Go/Python 调试器及 DAP UI。
-- `neo_tree.lua`：文件树及其内部操作。
-- `git.lua`：Git 相关插件。
-- `status.lua`：lualine、Bufferline 外观及标签快捷键，Snacks 关闭 buffer 快捷键。
-- `term.lua`：ToggleTerm，以及像 `:TermNew` 一样新建普通浮动终端并进入配置目录的 `:Config` 命令；新会话参与 `Ctrl+\` 和 `:TermSelect` 的终端管理。
-- `subject_skin.lua`：Catppuccin 主题。
-- `ai_claudecode.lua`：Claude Code IDE 集成。
-- `ai_copilotchat.lua`：Copilot Chat 备用配置；导入行当前保持注释，不会加载。
-
-插件内部快捷键可以继续留在插件 spec 的 `keys` 或 `config` 中。例如 Neo-tree 的 `<Leader>e` 同时承担延迟加载触发器，如果强行移入 AstroCore，反而会破坏 lazy.nvim 的按需加载语义。
-
-## AstroCore 与原生 API 的职责边界
-
-不依赖插件的配置直接使用 Neovim API，按快捷键、选项、事件和命令归类。依赖插件的设置与快捷键放在对应插件配置中；功能专用的局部快捷键与功能一起维护。
-
-以下情况直接调用 Neovim API：
-
-- LSP attach 后创建 buffer 局部映射和自动命令。
-- Neo-tree 节点操作等插件内部回调。
-- nvim-cmp 根据补全菜单状态执行的复杂按键逻辑。
-- DAP adapter 和调试事件监听。
-
-本项目不再通过 AstroCore 注册原生快捷键、基础选项和自动命令。新增配置按以上职责归位，避免在原生模块与插件配置中重复定义。
-
-### 关于 buffer 关闭
-
-独立安装 AstroCore 时，它不会像完整 AstroNvim 那样初始化 `vim.t.bufs` buffer 跟踪列表，因此不能直接调用依赖该列表的 `astrocore.buffer.close()`。项目使用 `Snacks.bufdelete` 安全删除 buffer，快捷键由 `plugins/status.lua` 中的 Snacks 配置管理。`wipe = true` 保留“关闭后重新打开时获得新 buffer”的标签页语义，Snacks 负责选择替代 buffer、保护窗口布局并处理未保存提示。
-
-`Space+Q` 在普通文件中使用 `Snacks.bufdelete` 安全删除 buffer；在 quickfix 或 location-list 结果窗口中关闭对应窗口。Bufferline 的鼠标叉号同样使用这套逻辑。`:q`/`:quit` 保留 Neovim 原义：关闭当前窗口，关闭最后一个窗口时退出 Neovim。Neo-tree 即使成为最后一个窗口也不会主动关闭 Neovim。
-
-## 关键实现与取舍
-
-| 位置 | 当前实现解决的问题 | 官方/插件已有能力 | 结论 |
-| --- | --- | --- | --- |
-| `lua/utils/buffer.lua` | 像 IDE 标签页一样 wipe buffer，同时保持窗口布局 | Snacks 提供 `Snacks.bufdelete({ wipe = true })`、`all()`、`other()` | **使用 Snacks 官方能力**。由它处理未保存提示、替代 buffer 和布局保护 |
-| `lua/commands.lua` 的 `MessagesBuffer` | 把原生 `:messages` 全部内容放进可滚动、可复制的浮窗 | Snacks 有 `Snacks.notifier.show_history()` / notification picker | **保留**。Snacks 只保证保存经过 notifier 的通知，不等于完整的 `:messages` 历史；直接替换可能漏掉 `nvim_echo`、命令输出等消息 |
-| `lua/plugins/lsp.lua` 的 `smart_references()` | 无引用时提示；单个引用直接跳；多个引用打开 quickfix；回车跳转后自动关闭列表 | Neovim 官方支持 `vim.lsp.buf.references(..., { on_list = ... })`；Snacks 提供 `Snacks.picker.lsp_references()` | **保留交互或改用 Picker 二选一**。当前 `on_list` 本身就是官方扩展点；Snacks 更短但会改变为统一 Picker 体验 |
-| `lua/plugins/lsp.lua` 的引用高亮自动命令 | 停留时请求语义引用，移动后清除；异步完成后刷新滚动条 | Neovim 提供 `document_highlight()`/`clear_references()`，但仍需要事件触发；没有“自动显示到 nvim-scrollbar”的选项 | **保留**。事件部分是官方推荐模式；滚动条刷新属于跨插件集成 |
-| `lua/plugins/scrollbar.lua` 的搜索同步 | 把 `*`、`#`、`/` 搜索结果持续画到滚动条，直到执行 `:noh` | nvim-scrollbar 自带依赖 `nvim-hlslens` 的 search handler；hlslens 官方要求在 `*`/`#` 映射后调用 `start()` | **使用官方集成**。关闭 hlslens 自己的行尾计数，并按官方映射启动 lens，以保留滚动条标记 |
-| `lua/plugins/scrollbar.lua` 的 LSP 引用 handler | 读取 Neovim 语义引用 extmark，在滚动条上显示真正同一符号的引用，避免把同名文本混入 | nvim-scrollbar 没有内置 LSP document-highlight handler | **保留**。这是有价值的跨插件功能；但 `nvim.lsp.references` 命名空间名称属于实现细节，升级 Neovim 时需要复查 |
-| `lua/plugins/neo_tree.lua` 的 `copy_selector` | 用 `Y` 选择并复制 basename、扩展名、文件名、相对/绝对路径或 URI 到系统剪贴板 | Neo-tree 的 `copy_to_clipboard` 是文件复制/粘贴队列，不是复制路径文本 | **保留**。二者功能不同，不应误替换 |
-| `lua/plugins/neo_tree.lua` 的 `system_open` | 用操作系统默认应用打开节点 | 当前实现调用 Neovim 官方 `vim.ui.open()`；Neo-tree v3 没有等价的通用默认命令 | **保留**，实现已经足够简单且跨平台 |
-| `lua/plugins/git.lua` 的 LazyGit 退出刷新 | LazyGit 修改仓库后刷新 filesystem、git_status、diagnostics；Windows 上又关闭了 libuv watcher | lazygit.nvim 提供 `vim.g.lazygit_on_exit_callback` | **使用官方回调**，在 LazyGit 退出后直接刷新 Neo-tree |
-| `lua/plugins/breadcrumb.lua` 的启用判断 | 只在普通文件窗口显示 Dropbar，不占用 Neo-tree、Claude Code 或浮窗的 winbar | Dropbar 官方支持 `bar.enable` 函数 | **保留**。这已经是在使用插件原生选项 |
-| `lua/plugins/breadcrumb.lua` 的全局开关 | 动态关闭所有现有 winbar，重新开启时触发重新附着 | Dropbar 提供 `bar.enable`，但没有完整等价的全局 toggle API | **保留**。手工刷新是为了让已打开窗口立刻响应 |
-| `lua/plugins/code_completion.lua` 的 `<CR>`/`<Tab>` 回调 | 插入和命令行模式中 Enter 只确认手动选中的候选；Tab 确认选中项或首项，插入模式无菜单时才尝试 LuaSnip | nvim-cmp 通过 mapping 回调提供这类条件行为，没有一个布尔选项完全等价 | **保留**。这是明确的补全交互策略 |
-| `lua/plugins/ai_copilot.lua` 的 `Alt+l` | Copilot 不再占用 Tab，用户通过独立按键明确接受整条建议 | copilot.vim 支持关闭默认 Tab 映射并调用 `copilot#Accept()` | **保留**。插件专属映射留在插件配置中，且不会改变 Tab 的原有行为 |
-| `lua/key_map.lua` 的插入模式左右键 | 补全菜单显示时保持方向键语义；否则允许左右跨行 | Neovim 的 `whichwrap` 与表达式映射可实现；没有插件选项能同时表达这个条件 | **保留** |
-| `lua/autocmds.lua` 的插入/离开模式诊断切换 | 输入时隐藏 virtual text，离开输入模式恢复 | `update_in_insert` 只控制诊断更新时间，不控制是否显示已有 virtual text | **保留** |
-| `lua/plugins/term.lua` 的 `Alt+n` | ToggleTerm 中从终端输入模式进入普通模式，保留 `Esc` 给交互程序 | ToggleTerm 官方文档建议为退出终端模式设置 buffer-local mapping | **保留** |
-| `lua/plugins/ai_claudecode.lua` 的 `Alt+n` 和 `<C-w><C-h/j/k/l/w>` | Claude Code 终端中进入普通模式、跨窗口移动 | Claude Code 官方将 `snacks_win_opts` 透传给 Snacks window，并支持其中的 `keys` | **保留**。当前写法就是插件公开配置入口 |
-
-## 快捷键风险
-
-### 已确认的有意覆盖
-
-1. `gr` 被设置成 `nowait = true` 的引用跳转。
-
-   Neovim 0.12 的全局 LSP 默认键包括 `gra`（Code Action）、`gri`
-   （Implementation）、`grn`（Rename）、`grr`（References）、`grt` 和 `grx`。
-   当前两键 `gr` 会立即执行，因此所有以 `gr` 开头的三键默认映射都不可达。
-   项目虽然另外映射了 `gi`、`<Leader>rn`、`<Leader>ca`，但 `grt`/`grx`
-   会被遮蔽。用户已确认只需要无延迟的 `gr`，因此保持现状。
-
-2. 插入模式 `<C-s>` 覆盖 Neovim 0.12 的 LSP `signature_help` 默认键。
-
-   当前用途是保存文件，插入模式下保存后返回普通模式，这是已确认的 IDE 风格选择。签名帮助如以后需要，可另设按键。
-
-3. `<C-h>` / `<C-l>`（也可用 `<C-Left>` / `<C-Right>`）和 `<C-k>` / `<C-j>`（也可用 `<C-Up>` / `<C-Down>`）在普通、插入、可视模式分别用于跨单词和跨段落移动。
-
-4. `<S-Up>` / `<S-Down>` 和 `<S-Left>` / `<S-Right>` 在普通、插入、可视模式分别用于翻页和跳到行首行尾。
-
-5. 普通模式 `D`（Shift+d）覆盖原生删除到行尾，改为诊断浮窗的打开、进入、关闭操作。这是用户明确要求的覆盖；删除到行尾仍可使用 `d$`。
-
-### 中优先级
-
-- 普通模式 `<C-d>` 和 `<C-f>` 被改为跳转列表后退/前进，覆盖原生半页向下和整页向下。
-- 普通、插入和可视模式 `<C-h/j/k/l>` 用于跨单词/段落移动，覆盖部分原生控制键语义。
-- `<Leader>b` 是 DAP 断点，同时也是 `<Leader>ba`/`<Leader>bo` 的前缀。它们能共存，但单独按 `<Leader>b` 时可能等待 `timeoutlen`。
-- `<C-S-z>` 在不同终端/键盘协议中不一定能与 `<C-z>` 区分，重做快捷键可能失效或被识别为撤销。
-
-### 安全的局部覆盖
-
-- Claude Code 的 `<C-w><C-h/j/k/l/w>` 与 Claude Code、ToggleTerm 的 `<A-n>` 只在各自终端 buffer 的 terminal mode 生效。
-- Neo-tree 的 `[b`、`]b`、`Y`、`O` 和 fuzzy finder 的 `<C-j>/<C-k>` 是插件窗口局部映射。
-- quickfix 中的 `<CR>` 只绑定到本次 LSP 引用结果 buffer。
-- Messages 和 README 浮窗中的 `q`/`Esc` 只绑定到各自 buffer。
-- 诊断浮窗中的 `D` 关闭映射只绑定到该诊断 buffer；`K` 的 hover 行为不变。
-- git-conflict 的 `co`、`ct`、`cb`、`c0`、`[x`、`]x` 只在检测到冲突的文件中建立。
-
-## 当前功能边界
-
-- Go 仅由 gopls 提供格式化，避免与 none-ls/goimports 重复。
-- Git 主界面只保留 LazyGit；gitsigns 和 git-conflict 分别负责行级提示与冲突处理。
-- Claude Code 通过 `claudecode.nvim` 提供终端、上下文发送和 diff 审阅。
-- Python 使用 Pyright 诊断和 Black 格式化。
-
-## 待验证事项
-
-1. 实际体验 hlslens 搜索滚动条是否仍符合预期。
-2. 实际体验 Snacks 对未保存 buffer 的逐个提示，再决定是否长期保留。
-3. 验证一次 LazyGit 修改文件并退出后，Neo-tree 是否立即刷新。
-4. 保留已确认的 `gr`、`Ctrl+s`，以及 Neo-tree 路径选择器、Dropbar 动态开关、补全条件映射和终端 `<A-n>`。
-
-## 常用检查命令
-
-### DAP UI 提示缺少 nvim-nio 时
-
-`lua/plugins/daps.lua` 已将 `nvim-neotest/nvim-nio` 声明为 `nvim-dap-ui` 的直接依赖，这是正确归属，无需挪到顶层或重复添加。`lazy-lock.json` 也记录了它。
-
-不要仅凭 dap-ui 的 “requires nvim-nio to be installed” 提示判断未安装：它用 `pcall(require, "nio")` 捕获所有加载错误，却丢弃原始原因。先用 `:lua local ok, result = pcall(require, "nio"); print(ok, result)` 查看真正的错误；若模块已加载或先前加载失败留下缓存，应在新进程中复现。
-
-2026-09-08 的受限无界面测试中，模块文件存在，真实错误是 `nio/logger.lua:52` 打开 `nio.log` 时 `Permission denied`。仅在测试进程内把日志目录指向可写临时目录后，`nio` 和 `dapui` 均加载成功。这是测试环境的写入限制，不能据此认定用户安装缺失，也不应为此修改项目依赖关系。
-
-### 检查入口
-
-- `:checkhealth astrocore`：检查 AstroCore 配置和快捷键冲突。
-- `:checkhealth nvim-treesitter`：检查 Treesitter 环境。
-- `:Lazy`：查看插件加载与安装状态。
-- `:Mason`：查看语言服务器和外部工具。
-- `:LspInfo`：查看当前 buffer 的 LSP 状态。
-
-如果某项行为与预期不同，优先从本文件的“核心配置位置”找到所属模块，再检查对应文件，而不是在整个项目中重复添加新实现。
-
-## 参考资料
-
-- [Neovim LSP defaults](https://neovim.io/doc/user/lsp/#lsp-defaults)
-- [Snacks bufdelete](https://github.com/folke/snacks.nvim/blob/main/docs/bufdelete.md)
-- [Snacks notifier](https://github.com/folke/snacks.nvim/blob/main/docs/notifier.md)
-- [Snacks picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
-- [Neo-tree v3 configuration and mappings](https://github.com/nvim-neo-tree/neo-tree.nvim)
-- [Dropbar configuration](https://github.com/Bekaboo/dropbar.nvim)
-- [nvim-scrollbar search integration](https://github.com/petertriho/nvim-scrollbar)
-- [ToggleTerm configuration](https://github.com/akinsho/toggleterm.nvim)
-- [Claude Code terminal/window configuration](https://github.com/coder/claudecode.nvim)
-- [lazygit.nvim exit callback](https://github.com/kdheepak/lazygit.nvim)
+排查时先从“文件职责”定位唯一负责模块，再检查原始错误，避免在多个文件叠加补丁。
