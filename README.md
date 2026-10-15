@@ -68,7 +68,7 @@ bash ./install-nvim.sh
 
 `Ctrl+w` 窗口导航也适用于文本插入模式和 Claude Code 终端；文本插入模式会先退出插入。第二个 `h/j/k/l/w` 可以继续按住 Ctrl，也可以松开 Ctrl。
 
-Neo-tree 中可用 `[b` / `]b` 切换栏目，`Y` 选择要复制的路径格式，`O` 或 `Shift+Enter` 用系统默认程序打开节点。
+Neo-tree 中选择文件打开后会自动关闭文件树；`[b` / `]b` 切换栏目，`Y` 选择要复制的路径格式，`O` 或 `Shift+Enter` 用系统默认程序打开节点。
 
 ## LSP、诊断与补全
 

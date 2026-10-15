@@ -133,6 +133,12 @@ return {
 
       event_handlers = {
         {
+          event = "file_opened",
+          handler = function()
+            require("neo-tree.command").execute({ action = "close" })
+          end,
+        },
+        {
           event = "neo_tree_buffer_enter", -- 进入 neo-tree buffer 时触发
           handler = function()
             vim.opt_local.signcolumn = "auto" -- 本地启用 signcolumn 自动显示
