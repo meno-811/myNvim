@@ -50,6 +50,7 @@ local function toggle_claude_zoom(self)
     self.opts.position = "right"
     self.opts.width = 0.30
     vim.api.nvim_win_set_config(self.win, { split = "right", win = target })
+    vim.api.nvim_win_call(self.win, function() vim.cmd("wincmd L") end)
     vim.api.nvim_win_set_width(self.win, math.floor(vim.o.columns * 0.30))
     return
   end
