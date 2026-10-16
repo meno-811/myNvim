@@ -1,6 +1,6 @@
 # Neovim 配置维护说明
 
-最后核对日期：2026-10-14
+最后核对日期：2026-10-15
 
 本文只记录当前结构、设计取舍、已确认行为和排错结论，不充当变更日志。面向用户的安装与操作说明放在 `README.md`。
 
@@ -27,7 +27,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 | `lua/key_map.lua` | 严格 Leader、编辑/导航/窗口快捷键、诊断浮窗和鼠标交互 |
 | `lua/autocmds.lua` | 外部文件检查、文件类型折行、插入模式诊断文字切换 |
 | `lua/commands.lua` | `MessagesBuffer`、`Readme` 及浮窗局部行为 |
-| `lua/utils/buffer.lua` | 基于 Snacks 的安全 buffer 关闭 |
+| `lua/utils/buffer.lua` | 基于 Snacks 的安全 buffer 关闭与全窗口跳转列表重置 |
 | `lua/plugins/astrocore.lua` | 诊断基础配置与 Treesitter 适配 |
 | `lua/plugins/lsp.lua` | Mason、LSP 配置、LspAttach 映射、hover 和引用行为 |
 | `lua/plugins/code_completion.lua` | nvim-cmp、LuaSnip、插入与命令行补全 |
@@ -66,6 +66,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 
 | 事件 | 行为 |
 | --- | --- |
+| `VimEnter` | ShaDa 加载完成后清空所有窗口的跳转列表 |
 | `FocusGained`、`BufEnter`、`CursorHold` | `checktime` 检查磁盘变化；只有无本地未保存修改的文件会按 `autoread` 重载 |
 | 代码文件 `FileType` | Lua、Python、JavaScript、Go、Rust 关闭折行 |
 | 文本文件 `FileType` | Markdown、text、vimwiki 开启 `wrap` 和 `linebreak` |
@@ -90,7 +91,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 
 - Bufferline `lazy=false`，启动即显示；仅有 `keys` 会导致首次按 Tab 后才加载，`always_show_bufferline` 不能替代加载时机。
 - 独立 AstroCore 不初始化完整 AstroNvim 的 `vim.t.bufs`，所以 buffer 关闭统一使用 `Snacks.bufdelete({ wipe=true })`。它负责未保存提示、替代 buffer 和窗口布局。
-- `<Leader>q` 在普通文件中删除当前 buffer，在 quickfix/location-list 中关闭结果窗口；`:q` 仍是 Neovim 原义。Neo-tree 成为最后一个窗口时不退出 Neovim。
+- `<Leader>q` 在普通文件中删除当前 buffer，在 quickfix/location-list 中关闭结果窗口；`:q` 仍是 Neovim 原义。`<Leader>ba` 关闭全部 buffer、`<Leader>bo` 仅保留当前 buffer 后，都会清空所有窗口的跳转列表。Neo-tree 成为最后一个窗口时不退出 Neovim。
 - Neo-tree 打开文件后通过 `file_opened` 事件自动关闭文件树。`Y` 复制名称、相对/绝对路径或 URI；这与插件的文件复制队列不是同一功能。`O`/`Shift+Enter` 使用 `vim.ui.open()`。
 - Windows 关闭 Neo-tree 的 libuv watcher；LazyGit 退出后通过插件官方回调刷新已加载的 filesystem、git_status、diagnostics source。
 - Dropbar 只占普通文件窗口的 winbar，不进入 Neo-tree、Claude Code 或浮窗；全局开关会同步刷新已经打开的窗口。

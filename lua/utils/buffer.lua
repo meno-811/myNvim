@@ -1,5 +1,13 @@
 local M = {}
 
+function M.clear_jumps()
+    for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+            vim.api.nvim_win_call(win, vim.cmd.clearjumps)
+        end
+    end
+end
+
 function M.close_view()
     if vim.bo.buftype == "quickfix" then
         local wininfo = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
@@ -17,10 +25,12 @@ end
 
 function M.close_all()
     require("snacks").bufdelete.all({ wipe = true })
+    M.clear_jumps()
 end
 
 function M.close_others()
     require("snacks").bufdelete.other({ wipe = true })
+    M.clear_jumps()
 end
 
 return M

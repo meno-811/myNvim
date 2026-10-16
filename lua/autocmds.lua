@@ -1,6 +1,12 @@
 -- 原生事件行为；命名分组避免重新加载时重复注册。
 local group = vim.api.nvim_create_augroup("user_editor", { clear = true })
 
+vim.api.nvim_create_autocmd("VimEnter", {
+    group = group,
+    desc = "Start with empty jump lists",
+    callback = function() require("utils.buffer").clear_jumps() end,
+})
+
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
     group = group,
     desc = "Reload files changed outside Neovim",
