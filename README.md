@@ -37,6 +37,7 @@ bash ./install-nvim.sh
 | `Ctrl+c`（可视模式） | 复制选区到系统剪贴板 |
 | `Ctrl+s` | 保存；插入模式下保存并返回普通模式 |
 | `Ctrl+z` / `Ctrl+Shift+z` | 撤销 / 重做 |
+| `Ctrl+i`（普通 / 插入模式） | 无操作 / 返回普通模式 |
 | `Ctrl+h/l` 或 `Ctrl+←/→` | 上一个 / 下一个单词 |
 | `Ctrl+k/j` 或 `Ctrl+↑/↓` | 上一个 / 下一个段落 |
 | `Shift+↑/↓` | 向上 / 向下翻页 |
@@ -86,7 +87,7 @@ Neo-tree 中选择文件打开后会自动关闭文件树；`[b` / `]b` 切换�
 | 快捷键 | 功能 |
 | --- | --- |
 | `Ctrl+\` | 打开或关闭 ToggleTerm |
-| `Alt+n`（终端输入模式） | 进入终端普通模式，便于选择和复制 |
+| `Ctrl+i`（终端输入模式） | 进入终端普通模式，便于选择和复制 |
 | `<Leader>ac` | 打开或切换 Claude Code，并进入输入状态 |
 | `<Leader>as` | 发送选区、添加文件或聚焦 Claude Code，并进入输入状态 |
 | `<Leader>ab` | 添加当前 buffer |

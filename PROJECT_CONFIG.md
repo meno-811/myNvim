@@ -1,6 +1,6 @@
 # Neovim 配置维护说明
 
-最后核对日期：2026-10-15
+最后核对日期：2026-10-16
 
 本文只记录当前结构、设计取舍、已确认行为和排错结论，不充当变更日志。面向用户的安装与操作说明放在 `README.md`。
 
@@ -53,6 +53,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 
 - Leader 是空格。普通和可视模式先吞掉未配置的单个可打印组合，实际映射再覆盖，因此 `Space+i` 不会回退执行原生 `i`，`Space+a` 超时也不会执行原生 `a`。
 - `Ctrl+a` 在普通、插入、可视模式全选；可视模式 `Ctrl+c` 写入系统 `+` 剪贴板；`Ctrl+s` 保存，插入模式会先退出。
+- `Ctrl+i` 在普通模式不执行操作，在插入模式返回普通模式，在终端输入模式进入终端普通模式；`Ctrl+f` 仍以非递归映射调用原生向前跳转。
 - `Ctrl+h/l` 与 `Ctrl+左右` 跨单词，`Ctrl+k/j` 与 `Ctrl+上下` 跨段落；`Shift+上下` 翻页，`Shift+左右` 到行首尾。
 - 文本 buffer 在首行继续按 `↑` 到第 1 列，在末行继续按 `↓` 到行尾。补全菜单可见或 `buftype` 非空时保留原生方向键行为。
 - 插入模式左右键可跨行；块选择通过 `virtualedit=block,onemore` 支持越过短行行尾。
@@ -98,9 +99,9 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 
 ### 终端与 Claude Code
 
-- ToggleTerm 的 `Alt+n` 从终端输入模式进入普通模式，保留 `Esc` 给终端程序。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
+- 全局 `Ctrl+i` 从终端输入模式进入终端普通模式，ToggleTerm 与 Claude 不再各自维护 `Alt+n`。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
 - Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
-- Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航；`Alt+n` 进入终端普通模式。
+- Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航；`Ctrl+i` 进入终端普通模式。
 - Claude 终端普通模式下的 `<Leader>az` 原地将同一窗口在最右侧 split 与全屏 float 间切换，底下的编辑窗口、buffer 和 Claude 进程都保留。
 - Claude 窗口里的 `<Leader>q` 调用窗口 `hide()`，保留 Claude 进程和 WebSocket；不要用删除 terminal buffer 代替隐藏。
 
@@ -126,6 +127,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - `gr` 使用 `nowait=true`，会遮蔽 Neovim 0.12 的 `gra/gri/grn/grr/grt/grx`。项目另有 `gi`、`<Leader>rn`、`<Leader>ca`，但 `grt/grx` 不可达。
 - `<Leader>b` 同时是 DAP 断点和 `<Leader>ba/bo` 前缀，单独使用可能等待 `timeoutlen`。
 - `Ctrl+Shift+z`、`Shift+Enter` 等组合是否可区分取决于终端和键盘协议；无法区分时 Neovim 收不到独立按键码。
+- `Ctrl+i` 与 `Tab` 只有在终端支持扩展键盘协议时才能区分；不支持时无法同时保证两者的不同行为。
 - 鼠标、Claude、Neo-tree、诊断/hover 浮窗和 quickfix 的特殊映射均限制在相应模式或 buffer，不能提升成全局映射。
 
 ## 环境与排错结论
