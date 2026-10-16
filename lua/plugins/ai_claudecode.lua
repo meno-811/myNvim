@@ -40,6 +40,41 @@ local function claude_tree_add_insert()
   claude_open_insert()
 end
 
+local function toggle_claude_zoom(self)
+  local config = vim.api.nvim_win_get_config(self.win)
+
+  if config.relative ~= "" then
+    local target = self._claude_zoom_target
+    if not (target and vim.api.nvim_win_is_valid(target)) then return end
+
+    self.opts.position = "right"
+    self.opts.width = 0.30
+    vim.api.nvim_win_set_config(self.win, { split = "right", win = target })
+    vim.api.nvim_win_set_width(self.win, math.floor(vim.o.columns * 0.30))
+    return
+  end
+
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if win ~= self.win and vim.api.nvim_win_get_config(win).relative == "" then
+      self._claude_zoom_target = win
+      break
+    end
+  end
+  if not self._claude_zoom_target then return end
+
+  self.opts.position = "float"
+  self.opts.width = 0
+  self.opts.height = 0
+  vim.api.nvim_win_set_config(self.win, {
+    relative = "editor",
+    row = 0,
+    col = 0,
+    width = vim.o.columns,
+    height = vim.o.lines,
+    border = "none",
+  })
+end
+
 return {
   {
     "coder/claudecode.nvim",
@@ -61,6 +96,12 @@ return {
               function(self) self:hide() end,
               mode = "n",
               desc = "隐藏 Claude Code",
+            },
+            claude_zoom = {
+              "<leader>az",
+              toggle_claude_zoom,
+              mode = "n",
+              desc = "切换 Claude Code 全屏",
             },
             claude_win_left = {
               "<C-w>h",

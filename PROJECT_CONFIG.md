@@ -100,6 +100,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - ToggleTerm 的 `Alt+n` 从终端输入模式进入普通模式，保留 `Esc` 给终端程序。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
 - Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
 - Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航；`Alt+n` 进入终端普通模式。
+- Claude 终端普通模式下的 `<Leader>az` 原地将同一窗口在右侧 split 与全屏 float 间切换，底下的编辑窗口、buffer 和 Claude 进程都保留。
 - Claude 窗口里的 `<Leader>q` 调用窗口 `hide()`，保留 Claude 进程和 WebSocket；不要用删除 terminal buffer 代替隐藏。
 
 ## 保留的定制与理由
