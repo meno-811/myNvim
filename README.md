@@ -72,6 +72,7 @@ Shift 选择使用 Neovim Select 模式：进入后可用方向键或 `Shift+方
 | `<Leader>ba` / `<Leader>bo` | 关闭全部 / 仅保留当前文件；两者都会重置跳转列表 |
 | `<Leader>e` / `<Leader>o` | 切换文件树 / 在文件树与编辑区间切换焦点 |
 | `<Leader>up` | 显示或隐藏顶部路径栏 |
+| `Alt+x` | 将当前窗口切换为全屏浮窗 |
 | `Ctrl+w` 后接 `h/j/k/l`、方向键或 `w`（普通模式） | 移动窗口或切换到下一窗口 |
 
 插入模式保留原生的 `Ctrl+w` 删除前一个单词，以及 `Ctrl+h/j/k` 的退格、换行和 Digraph；跨单词或段落可使用 Ctrl 加方向键。
@@ -105,9 +106,8 @@ Neo-tree 中选择文件打开后会自动关闭文件树；`[b` / `]b` 切换�
 | `<Leader>ar` / `<Leader>aC` | 恢复 / 继续 Claude 会话 |
 | `<Leader>am` | 选择 Claude 模型 |
 | `<Leader>aa` / `<Leader>ad` | 接受 / 拒绝 Claude diff |
-| `<Leader>az`（Claude 终端普通模式） | 在右侧栏与全屏浮窗间切换 |
 
-Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口。终端普通模式下按 `<Leader>q` 只隐藏窗口，不会结束会话。全屏浮窗只覆盖原编辑布局，不会关闭或删除文本 buffer。
+Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口。终端普通模式下按 `<Leader>q` 只隐藏窗口，不会结束会话；终端输入模式也可直接使用 `Alt+x` 切换全屏浮窗。
 
 ## Markdown
 

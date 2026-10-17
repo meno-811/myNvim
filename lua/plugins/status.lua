@@ -2,10 +2,16 @@
 
 
 return{
-    -- Buffer 关闭依赖 Snacks；快捷键和插件一起注册。
+    -- Buffer 关闭和通用窗口缩放依赖 Snacks；快捷键和插件一起注册。
     {
         "folke/snacks.nvim",
         keys = {
+            {
+                "<A-x>",
+                function() Snacks.zen.zoom() end,
+                mode = { "n", "i", "v", "t" },
+                desc = "Toggle window zoom",
+            },
             { "<Leader>q", function() require("utils.buffer").close_view() end, desc = "Close current view" },
             { "<Leader>ba", function() require("utils.buffer").close_all() end, desc = "Close all buffers" },
             { "<Leader>bo", function() require("utils.buffer").close_others() end, desc = "Close other buffers" },

@@ -34,7 +34,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 | `lua/plugins/lsp.lua` | Mason、LSP 配置、LspAttach 映射、hover 和引用行为 |
 | `lua/plugins/code_completion.lua` | nvim-cmp、LuaSnip、插入与命令行补全 |
 | `lua/plugins/none_ls.lua` | stylua、black、shfmt 外部格式化 |
-| `lua/plugins/status.lua` | lualine、Bufferline、Snacks 关闭入口 |
+| `lua/plugins/status.lua` | lualine、Bufferline、Snacks 窗口缩放与关闭入口 |
 | `lua/plugins/neo_tree.lua` | 文件树、路径复制、系统打开和 source 切换 |
 | `lua/plugins/breadcrumb.lua` | Dropbar 路径栏及动态开关 |
 | `lua/plugins/scrollbar.lua` | 诊断、搜索和 LSP 引用滚动条标记 |
@@ -100,13 +100,14 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - Neo-tree 打开文件后通过 `file_opened` 事件自动关闭文件树。`Y` 复制名称、相对/绝对路径或 URI；这与插件的文件复制队列不是同一功能。`O`/`Shift+Enter` 使用 `vim.ui.open()`。
 - Windows 关闭 Neo-tree 的 libuv watcher；LazyGit 退出后通过插件官方回调刷新已加载的 filesystem、git_status、diagnostics source。
 - Dropbar 只占普通文件窗口的 winbar，不进入 Neo-tree、Claude Code 或浮窗；全局开关会同步刷新已经打开的窗口。
+- `Alt+x` 在普通、插入、Visual/Select 和终端输入模式调用 Snacks 原生 zoom，为当前 buffer 叠加全屏浮窗；代码、Neo-tree、quickfix 和诊断/hover 浮窗共用同一入口，关闭后恢复原布局并同步光标。
 
 ### 终端与 Claude Code
 
 - 全局 `Alt+i` 用于从终端输入模式进入终端普通模式，包括 Claude Code 终端。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
 - Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
 - Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航。
-- Claude 终端普通模式下的 `<Leader>az` 原地将同一窗口在最右侧 split 与全屏 float 间切换，底下的编辑窗口、buffer 和 Claude 进程都保留。
+- Claude 终端在输入或普通模式都可使用 `Alt+x` 切换 Snacks 全屏浮窗，底下的编辑窗口、buffer 和 Claude 进程都保留。
 - Claude 窗口里的 `<Leader>q` 调用窗口 `hide()`，保留 Claude 进程和 WebSocket；不要用删除 terminal buffer 代替隐藏。
 
 ## 保留的定制与理由
