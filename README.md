@@ -107,7 +107,7 @@ Neo-tree 中选择文件打开后会自动关闭文件树；`[b` / `]b` 切换�
 | `<Leader>am` | 选择 Claude 模型 |
 | `<Leader>aa` / `<Leader>ad` | 接受 / 拒绝 Claude diff |
 
-Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口。终端普通模式下按 `<Leader>q` 只隐藏窗口，不会结束会话；终端输入模式也可直接使用 `Alt+x` 切换全屏浮窗。
+Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口；未完成的 `Ctrl+w` 前缀超时后会被忽略，不会传给终端。终端普通模式下按 `<Leader>q` 只隐藏窗口，不会结束会话；终端输入模式也可直接使用 `Alt+x` 切换全屏浮窗。
 
 ## Markdown
 

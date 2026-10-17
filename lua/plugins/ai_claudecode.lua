@@ -49,6 +49,16 @@ return {
         git_repo_cwd = true,
         auto_insert = false,
         snacks_win_opts = {
+          on_buf = function(self)
+            vim.schedule(function()
+              if not vim.api.nvim_buf_is_valid(self.buf) then return end
+              vim.keymap.set("t", "<C-w>", "<Nop>", {
+                buffer = self.buf,
+                nowait = false,
+                desc = "Claude 窗口命令前缀",
+              })
+            end)
+          end,
           keys = {
             claude_hide = {
               "<leader>q",
