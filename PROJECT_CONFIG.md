@@ -4,6 +4,8 @@
 
 本文只记录当前结构、设计取舍、已确认行为和排错结论，不充当变更日志。面向用户的安装与操作说明放在 `README.md`。
 
+快捷键设计以降低记忆负担为首要原则：优先保持跨编辑器通用操作和既有肌肉记忆，在不冲突的前提下尽可能保留 Neovim 原生行为，只覆盖或迁移确有必要的按键。
+
 ## 总体结构
 
 这是独立的 Neovim 0.12+ 配置，不是完整 AstroNvim 发行版。lazy.nvim 管理插件；AstroCore 只提供诊断基础配置和新版 Treesitter 适配。
@@ -52,14 +54,16 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ### 原生编辑器层
 
 - Leader 是空格。普通和可视模式先吞掉未配置的单个可打印组合，实际映射再覆盖，因此 `Space+i` 不会回退执行原生 `i`，`Space+a` 超时也不会执行原生 `a`。
-- `Ctrl+a` 在普通、插入、可视模式全选；可视模式 `Ctrl+c` 写入系统 `+` 剪贴板；`Ctrl+s` 保存，插入模式会先退出。
-- `Ctrl+i` 在普通模式不执行操作，在插入模式返回普通模式，在终端输入模式进入终端普通模式；`Ctrl+f` 仍以非递归映射调用原生向前跳转。
-- `Ctrl+h/l` 与 `Ctrl+左右` 跨单词，`Ctrl+k/j` 与 `Ctrl+上下` 跨段落；`Shift+上下` 翻页，`Shift+左右` 到行首尾。
+- `Ctrl+a` 在普通和可视模式全选，插入模式保留原生“插入上次输入文本”；`Ctrl+n` 在普通和可视模式调用原生数字加一；Visual/Select 模式的 `Ctrl+c` 写入系统 `+` 剪贴板；`Ctrl+v` 在普通、插入、Visual/Select 和终端输入模式通过 `nvim_paste()` 粘贴系统 `+` 剪贴板，命令行使用原生寄存器插入，块选择改用原生 `Ctrl+q`；`Ctrl+s` 保存，插入模式会先退出；`Ctrl+z` / `Ctrl+Shift+z` 在普通、插入、Visual/Select 模式撤销 / 重做。
+- `Alt+i` 在插入模式返回普通模式，在终端输入模式进入终端普通模式，作为统一的“退出当前输入状态”按键。
+- 普通模式保留原生 `Ctrl+o/i`（或 `Tab`）跳转列表后退/前进。`Ctrl+d` 改为三阶段诊断浮窗；LSP buffer 中的 `Ctrl+f` 改为三阶段 hover，其他 buffer 仍为原生整页向下。
+- 普通和可视模式使用 `Ctrl+h/l` 跨单词、`Ctrl+k/j` 跨段落；所有文本模式可用 `Ctrl+左右` 跨单词、`Ctrl+上下` 跨段落。原生 `{` / `}` 已禁用，统一使用 Ctrl 加上下键；`Ctrl+l` 覆盖的清高亮、diff 更新和重绘不迁移，需要时使用 `:noh`、`:diffupdate`、`:redraw!`。
+- `keymodel=startsel` 与 `selectmode=key` 启用原生输入框式选择：在普通或插入模式按 Shift 加方向/Home/End/PageUp/PageDown 进入 Select 模式，进入后方向键和 Shift 加方向键都会继续调整选区，输入文字替换选区。普通、可视和 Select 模式的 `H/J/K/L` 等同于 `Shift+←/↓/↑/→`；Neo-tree 和操作符等待模式保留原生行为。
 - 文本 buffer 在首行继续按 `↑` 到第 1 列，在末行继续按 `↓` 到行尾。补全菜单可见或 `buftype` 非空时保留原生方向键行为。
 - 插入模式左右键可跨行；块选择通过 `virtualedit=block,onemore` 支持越过短行行尾。
-- 普通模式双击左键在点击位置进入插入模式。插入模式点击另一窗口时先退出插入，防止 Neo-tree 继承插入模式或 Claude 直接进入终端输入模式。
-- 普通模式 `D` 打开当前行诊断，第二次进入浮窗，浮窗内第三次关闭；无诊断时不执行原生删除。
-- 普通模式使用原生 `Ctrl+w` 窗口命令。插入模式把 `Ctrl+w` 改为窗口前缀，后接 `h/j/k/l`、对应 Ctrl 组合、方向键或 `w` 时先退出插入再移动。
+- 普通模式双击左键保留原生单词选择。插入模式点击另一窗口时先退出插入，防止 Neo-tree 继承插入模式或 Claude 直接进入终端输入模式。
+- 普通模式 `Ctrl+d` 打开当前行诊断，第二次进入浮窗，浮窗内第三次关闭。
+- 普通模式使用原生 `Ctrl+w` 窗口命令，不再添加全局 `Alt+w w` 别名。
 
 ### 自动命令
 
@@ -83,14 +87,14 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ### LSP、诊断与滚动条
 
 - Mason 安装 `gopls`、`pyright`、`lua_ls`、`rust_analyzer`。Python 由 Pyright 诊断、Black 格式化；Go 只用 gopls 格式化，避免重复 provider。
-- `K` 三阶段为打开 hover、进入浮窗、关闭；关闭映射只挂在带 `textDocument/hover` 标记的浮窗。
-- `gr` 不包含声明：0 个结果提示，1 个直接跳转，多个进入 quickfix，回车跳转后关闭列表。
+- LSP buffer 中的 `Ctrl+f` 三阶段为打开 hover、进入浮窗、关闭；关闭映射只挂在带 `textDocument/hover` 标记的浮窗。
+- `grr` 不包含声明：0 个结果提示，1 个直接跳转，多个进入 quickfix，回车跳转后关闭列表。`gri` 跳转到实现；原生 `gi` 和 `gr` 前缀保持可用。
 - 支持 documentHighlight 的 LSP 在 `CursorHold` 高亮语义引用，移动时清除；滚动条读取引用 extmark。搜索滚动条使用 nvim-scrollbar 与 hlslens 官方集成。
 - `render-markdown.nvim` 只做终端内视觉渲染，不提供浏览器式字号、布局和图片能力。
 
 ### Buffer、文件树与 Git
 
-- Bufferline `lazy=false`，启动即显示；仅有 `keys` 会导致首次按 Tab 后才加载，`always_show_bufferline` 不能替代加载时机。
+- Bufferline `lazy=false`，启动即显示；使用 Neovim 原生 `[b` / `]b` 切换 buffer，`Leader 1…9` 按编号切换。
 - 独立 AstroCore 不初始化完整 AstroNvim 的 `vim.t.bufs`，所以 buffer 关闭统一使用 `Snacks.bufdelete({ wipe=true })`。它负责未保存提示、替代 buffer 和窗口布局。
 - `<Leader>q` 在普通文件中删除当前 buffer，在 quickfix/location-list 中关闭结果窗口；`:q` 仍是 Neovim 原义。`<Leader>ba` 关闭全部 buffer、`<Leader>bo` 仅保留当前 buffer 后，都会清空所有窗口的跳转列表。Neo-tree 成为最后一个窗口时不退出 Neovim。
 - Neo-tree 打开文件后通过 `file_opened` 事件自动关闭文件树。`Y` 复制名称、相对/绝对路径或 URI；这与插件的文件复制队列不是同一功能。`O`/`Shift+Enter` 使用 `vim.ui.open()`。
@@ -99,9 +103,9 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 
 ### 终端与 Claude Code
 
-- 全局 `Ctrl+i` 从终端输入模式进入终端普通模式，ToggleTerm 与 Claude 不再各自维护 `Alt+n`。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
+- 全局 `Alt+i` 用于从终端输入模式进入终端普通模式，包括 Claude Code 终端。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
 - Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
-- Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航；`Ctrl+i` 进入终端普通模式。
+- Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航。
 - Claude 终端普通模式下的 `<Leader>az` 原地将同一窗口在最右侧 split 与全屏 float 间切换，底下的编辑窗口、buffer 和 Claude 进程都保留。
 - Claude 窗口里的 `<Leader>q` 调用窗口 `hide()`，保留 Claude 进程和 WebSocket；不要用删除 terminal buffer 代替隐藏。
 
@@ -119,15 +123,17 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 
 ## 有意覆盖与兼容风险
 
-- `D` 覆盖删除到行尾；需要原行为时用 `d$`。
-- 普通模式 `Ctrl+a` 覆盖数字递增，`Ctrl+x` 的递减仍保留；可视模式原生的 `g<C-a>` / `g<C-x>` 序列递增/递减仍可使用，但需以实际终端按键传输为准。
-- 插入模式 `Ctrl+w` 覆盖“删除前一个单词”。
-- `Ctrl+d/f` 覆盖半页向下/整页向下，改为跳转列表后退/前进。
+- 文本窗口中的 `H/J/K/L` 覆盖屏幕顶端、合并行、关键词查询和屏幕底端，改为 Shift 选择；Neo-tree 和操作符等待模式不覆盖。
+- 普通模式 `Ctrl+d` 覆盖半页向下；LSP buffer 中的 `Ctrl+f` 覆盖整页向下。
+- `Ctrl+v` 覆盖普通模式块选择、插入/命令行的字面量输入及终端原始输入，统一用于系统剪贴板粘贴；块选择保留在 `Ctrl+q`。
+- 普通和可视模式 `Ctrl+a` 覆盖数字递增，改用 `Ctrl+n` 加一；插入模式 `Ctrl+a` 保持原生。`Ctrl+x` 的递减仍保留。可视模式原生的 `g<C-a>` / `g<C-x>` 序列递增/递减仍可使用，但需以实际终端按键传输为准。
+- `Ctrl+z` 在普通和 Visual/Select 模式覆盖原生挂起，需要时使用 `:suspend`。
+- `Ctrl+h/j/k/l` 与 `Ctrl+方向键` 统一表示跨单词/段落移动；因此原生 `{` / `}` 已禁用，`Ctrl+l` 的原生清高亮、diff 更新和重绘也不再有快捷键。
 - 插入模式 `Ctrl+s` 覆盖 Neovim 0.12 默认 LSP signature help。
-- `gr` 使用 `nowait=true`，会遮蔽 Neovim 0.12 的 `gra/gri/grn/grr/grt/grx`。项目另有 `gi`、`<Leader>rn`、`<Leader>ca`，但 `grt/grx` 不可达。
 - `<Leader>b` 同时是 DAP 断点和 `<Leader>ba/bo` 前缀，单独使用可能等待 `timeoutlen`。
 - `Ctrl+Shift+z`、`Shift+Enter` 等组合是否可区分取决于终端和键盘协议；无法区分时 Neovim 收不到独立按键码。
-- `Ctrl+i` 与 `Tab` 只有在终端支持扩展键盘协议时才能区分；不支持时无法同时保证两者的不同行为。
+- Shift 选择同样依赖终端能够区分 Shift 修饰的方向键及 Home/End/PageUp/PageDown。
+- 当前终端不会把 `Ctrl+Shift+↑/↓` 传给 Neovim，因此不能用它们按段落开始或继续 Select；不要在 Neovim 内重复添加该组合的映射，除非先修改终端按键协议或绑定。
 - 鼠标、Claude、Neo-tree、诊断/hover 浮窗和 quickfix 的特殊映射均限制在相应模式或 buffer，不能提升成全局映射。
 
 ## 环境与排错结论
@@ -137,6 +143,11 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - nvim-web-devicons 需要 Nerd Font 3.3+。终端 Neovim 的字体由本地终端控制，`guifont` 不生效；WSL/SSH 也应配置连接端的终端字体。
 - SSH 中 `options.lua` 将剪贴板 provider 设为 OSC 52，支持远端 Neovim 复制到本机剪贴板。反向粘贴通常由终端完成；tmux/screen 还需允许 OSC 52 透传。
 - `install-nvim.sh` 将 `x86_64/amd64` 映射到 x86_64 AppImage，将 `aarch64/arm64` 映射到 arm64；其他架构直接报错。脚本用临时文件和原子替换更新 `/usr/bin/nvim`。
+
+### 受控环境中的无界面测试
+
+- 受控测试环境可能把 `stdpath("config")` 和 `stdpath("data")` 重定向到空的沙箱目录，因此直接运行 `nvim --headless` 不一定会加载本仓库或已安装插件。先打印 `vim.fn.stdpath("config")` 核对实际路径；若行号、`whichwrap` 等所有选项都回到默认值，应先判定为配置未加载，不要误判成插件重置配置。
+- 只验证原生选项和键位时，使用 `nvim --clean --headless -u NONE`，显式把本仓库加入 `runtimepath`，再 `require("options")`、`require("key_map")`。需要验证完整插件启动时，必须同时确认真实的 config/data 路径和插件目录可见，不能把上述局部模块测试当成完整启动测试。
 
 ### DAP UI 报 nvim-nio 缺失
 

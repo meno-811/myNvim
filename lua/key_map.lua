@@ -14,39 +14,30 @@ for code = 33, 126 do
     map({ "n", "x" }, "<leader>" .. key, "<Nop>", { silent = true })
 end
 
--- D：打开当前行诊断，再按进入浮窗；浮窗内再按关闭并返回。
-map("n", "D", function()
+-- Ctrl+d：打开当前行诊断，再按进入浮窗；浮窗内再按关闭并返回。
+map("n", "<C-d>", function()
     local buf, win = vim.diagnostic.open_float({ scope = "line" })
     if not buf or not win then return end
-    map("n", "D", function()
+    map("n", "<C-d>", function()
         if vim.api.nvim_win_is_valid(win) then
             vim.api.nvim_win_close(win, true)
         end
     end, { buffer = buf, silent = true, nowait = true, desc = "Close diagnostic float" })
 end, { silent = true, desc = "Show line diagnostics" })
 
-map("n", "<C-d>", "<C-o>", { desc = "Jump backward" })
-map("n", "<C-f>", "<C-i>", { desc = "Jump forward" })
-map("n", "<C-i>", "<Nop>", { desc = "Disable native jump forward" })
-map("i", "<C-i>", "<Esc>", { desc = "Leave insert mode" })
-map("t", "<C-i>", [[<C-\><C-n>]], { desc = "Enter terminal normal mode" })
-map("t", "<Tab>", "<Tab>", { desc = "Send Tab to terminal" })
-map({ "n", "x" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save file" })
+map({ "n", "v" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save file" })
 map("i", "<C-s>", "<Esc><Cmd>write<CR>", { desc = "Save file and leave insert mode" })
 map({ "n", "x" }, "<C-a>", "ggVG", { desc = "Select all" })
-map("i", "<C-a>", "<Esc>ggVG", { desc = "Select all" })
-map("x", "<C-c>", '"+y', { desc = "Copy selection" })
-map({ "n", "i" }, "<C-z>", "<Cmd>undo<CR>", { desc = "Undo" })
-map({ "n", "i" }, "<C-S-z>", "<Cmd>redo<CR>", { desc = "Redo" })
-map("i", "<C-w>", "<Nop>", { desc = "Window command prefix" })
-for key, direction in pairs {
-    h = "h", j = "j", k = "k", l = "l", w = "w",
-    ["<C-h>"] = "h", ["<C-j>"] = "j", ["<C-k>"] = "k", ["<C-l>"] = "l", ["<C-w>"] = "w",
-    ["<Left>"] = "h", ["<Down>"] = "j", ["<Up>"] = "k", ["<Right>"] = "l",
-} do
-    map("i", "<C-w>" .. key, "<Esc><C-w>" .. direction, { desc = "Leave insert mode and move window" })
-end
-map("n", "<2-LeftMouse>", "<LeftMouse>i", { desc = "Enter insert mode at mouse position" })
+map({ "n", "x" }, "<C-n>", "<C-a>", { desc = "Increment number" })
+map("v", "<C-c>", '"+y', { desc = "Copy selection" })
+map({ "n", "i", "v", "t" }, "<C-v>", function()
+    vim.api.nvim_paste(vim.fn.getreg("+", 1), true, -1)
+end, { desc = "Paste clipboard" })
+map("c", "<C-v>", "<C-r>+", { desc = "Paste clipboard" })
+map("i", "<A-i>", "<Esc>", { desc = "Leave insert mode" })
+map("t", "<A-i>", [[<C-\><C-n>]], { desc = "Enter terminal normal mode" })
+map({ "n", "i", "v" }, "<C-z>", "<Cmd>undo<CR>", { desc = "Undo" })
+map({ "n", "i", "v" }, "<C-S-z>", "<Cmd>redo<CR>", { desc = "Redo" })
 map("i", "<LeftMouse>", function()
     local winid = vim.fn.getmousepos().winid
     return winid ~= 0 and winid ~= vim.api.nvim_get_current_win()
@@ -75,10 +66,9 @@ map({ "n", "x" }, "<C-h>", "b", { desc = "Move to previous word" })
 map({ "n", "x" }, "<C-l>", "w", { desc = "Move to next word" })
 map({ "n", "x" }, "<C-k>", "{", { desc = "Move to previous paragraph" })
 map({ "n", "x" }, "<C-j>", "}", { desc = "Move to next paragraph" })
-map("i", "<C-h>", "<C-o>b", { desc = "Move to previous word" })
 map("i", "<C-l>", "<C-o>w", { desc = "Move to next word" })
-map("i", "<C-k>", "<C-o>{", { desc = "Move to previous paragraph" })
-map("i", "<C-j>", "<C-o>}", { desc = "Move to next paragraph" })
+map({ "n", "x", "o" }, "{", "<Nop>", { desc = "Use Ctrl+Up for previous paragraph" })
+map({ "n", "x", "o" }, "}", "<Nop>", { desc = "Use Ctrl+Down for next paragraph" })
 map({ "n", "x" }, "<C-Left>", "b", { desc = "Move to previous word" })
 map({ "n", "x" }, "<C-Right>", "w", { desc = "Move to next word" })
 map({ "n", "x" }, "<C-Up>", "{", { desc = "Move to previous paragraph" })
@@ -87,10 +77,16 @@ map("i", "<C-Left>", "<C-o>b", { desc = "Move to previous word" })
 map("i", "<C-Right>", "<C-o>w", { desc = "Move to next word" })
 map("i", "<C-Up>", "<C-o>{", { desc = "Move to previous paragraph" })
 map("i", "<C-Down>", "<C-o>}", { desc = "Move to next paragraph" })
-map({ "n", "i", "x" }, "<S-Up>", "<PageUp>", { desc = "Page up" })
-map({ "n", "i", "x" }, "<S-Down>", "<PageDown>", { desc = "Page down" })
-map({ "n", "i", "x" }, "<S-Left>", "<Home>", { desc = "Move to start of line" })
-map({ "n", "i", "x" }, "<S-Right>", "<End>", { desc = "Move to end of line" })
+
+-- 在文本窗口中让 Shift+hjkl 与 Shift+方向键一致；Neo-tree 保留自己的按键。
+for key, direction in pairs {
+    H = "<S-Left>", J = "<S-Down>", K = "<S-Up>", L = "<S-Right>",
+} do
+    map({ "n", "x", "s" }, key, function()
+        return vim.bo.filetype == "neo-tree" and key or direction
+    end, { expr = true, silent = true, desc = "Select with " .. direction })
+end
+
 map("i", "<Left>", function()
     return vim.fn.pumvisible() == 1 and "<Left>" or "<C-o>h"
 end, { expr = true, silent = true, desc = "Move left across line boundaries" })

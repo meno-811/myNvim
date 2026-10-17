@@ -18,6 +18,8 @@ local options = {
     ignorecase = true,
     smartcase = true,
     incsearch = true,
+    keymodel = "startsel",
+    selectmode = "key",
     -- 块选择时允许光标越过短行行尾；其他模式仍保留左右键跨行。
     virtualedit = "block,onemore",
     whichwrap = "b,s,<,>,h,l",

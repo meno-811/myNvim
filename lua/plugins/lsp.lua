@@ -29,7 +29,7 @@ return {
       -- cmp-nvim-lsp 默认已经包含 semantic tokens 的 capabilities
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- 第二次 K 进入 hover 浮窗后，第三次 K 关闭它，避免触发原生帮助查询。
+      -- 第二次 Ctrl+f 进入 hover 浮窗后，第三次 Ctrl+f 关闭它。
       vim.api.nvim_create_autocmd("WinEnter", {
         group = vim.api.nvim_create_augroup("UserLspHover", { clear = true }),
         callback = function()
@@ -38,7 +38,7 @@ return {
             or not vim.w[win]["textDocument/hover"] then
             return
           end
-          vim.keymap.set("n", "K", function()
+          vim.keymap.set("n", "<C-f>", function()
             if vim.api.nvim_win_is_valid(win) then
               vim.api.nvim_win_close(win, true)
             end
@@ -100,21 +100,18 @@ return {
           local client = vim.lsp.get_client_by_id(args.data.client_id)
           if not client then return end
 
-          local map = function(mode, lhs, rhs, desc, opts)
-            vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("force", {
+          local map = function(mode, lhs, rhs, desc)
+            vim.keymap.set(mode, lhs, rhs, {
               buffer = bufnr,
               silent = true,
               desc = desc,
-            }, opts or {}))
+            })
           end
 
           map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
           map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
-          -- Neovim 0.12 内置了 gra/grn/grr 等映射。若不设置 nowait，
-          -- 按下 gr 后会等待 timeoutlen，确认用户是否还要输入第三个键。
-          map("n", "gr", smart_references, "Go to References", { nowait = true })
-          map("n", "gi", vim.lsp.buf.implementation, "Go to Implementation")
-          map("n", "K", vim.lsp.buf.hover, "Hover")
+          map("n", "grr", smart_references, "Go to References")
+          map("n", "<C-f>", vim.lsp.buf.hover, "Hover")
           map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
           map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
           map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")

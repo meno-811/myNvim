@@ -27,10 +27,7 @@ return{
         lazy = false, -- 启动即显示标签栏，避免 keys 使插件仅在首次切换时加载。
         dependencies = { "nvim-tree/nvim-web-devicons", "folke/snacks.nvim" },
         keys = function()
-            local keys = {
-                { "<Tab>", "<Cmd>BufferLineCycleNext<CR>", desc = "Next buffer" },
-                { "<S-Tab>", "<Cmd>BufferLineCyclePrev<CR>", desc = "Previous buffer" },
-            }
+            local keys = {}
             for index = 1, 9 do
                 keys[#keys + 1] = {
                     "<Leader>" .. index,
