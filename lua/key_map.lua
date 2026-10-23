@@ -14,7 +14,7 @@ for code = 33, 126 do
     map({ "n", "x" }, "<leader>" .. key, "<Nop>", { silent = true })
 end
 
--- Ctrl+d：打开当前行诊断，再按进入浮窗；浮窗内再按关闭并返回。
+-- Ctrl+d：打开并进入当前行诊断浮窗，再按关闭并返回。
 map("n", "<C-d>", function()
     local buf, win = vim.diagnostic.open_float({ scope = "line" })
     if not buf or not win then return end
@@ -23,6 +23,7 @@ map("n", "<C-d>", function()
             vim.api.nvim_win_close(win, true)
         end
     end, { buffer = buf, silent = true, nowait = true, desc = "Close diagnostic float" })
+    vim.api.nvim_set_current_win(win)
 end, { silent = true, desc = "Show line diagnostics" })
 
 map({ "n", "v" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save file" })

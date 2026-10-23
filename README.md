@@ -86,8 +86,8 @@ Neo-tree 中选择文件打开后会自动关闭文件树；`[b` / `]b` 切换�
 | `gd` / `gD` / `gri` / `grr` | 定义 / 声明 / 实现 / 引用 |
 | `Ctrl+o` / `Ctrl+i`（或 `Tab`） | 跳转列表后退 / 前进（Neovim 原生） |
 | `<Leader>;` | 选择顶部路径或代码层级 |
-| `Ctrl+f`（LSP 文件） | 打开 hover；再按进入浮窗；第三次关闭 |
-| `Ctrl+d` | 打开当前行诊断；再按进入浮窗；第三次关闭 |
+| `Ctrl+f`（LSP 文件） | 打开并进入 hover 浮窗；再按关闭 |
+| `Ctrl+d` | 打开并进入当前行诊断浮窗；再按关闭 |
 | `[d` / `]d` | 上一个 / 下一个诊断 |
 | `<Leader>rn` / `<Leader>ca` | 重命名 / Code Action |
 | `Alt+l` | 接受整条 Copilot 建议 |
