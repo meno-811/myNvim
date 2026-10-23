@@ -28,7 +28,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 | `lua/options.lua` | 行号、缩进、搜索、鼠标、剪贴板、`virtualedit`、`whichwrap` 等原生选项 |
 | `lua/key_map.lua` | 严格 Leader、编辑/导航/窗口快捷键、诊断浮窗和鼠标交互 |
 | `lua/autocmds.lua` | 外部文件检查、文件类型折行、插入模式诊断文字切换 |
-| `lua/commands.lua` | `MessagesBuffer`、`Readme` 及浮窗局部行为 |
+| `lua/commands.lua` | `Loadenv` 会话环境加载、`MessagesBuffer`、`Readme` 及浮窗局部行为 |
 | `lua/utils/buffer.lua` | 基于 Snacks 的安全 buffer 关闭与全窗口跳转列表重置 |
 | `lua/plugins/astrocore.lua` | 诊断基础配置与 Treesitter 适配 |
 | `lua/plugins/lsp.lua` | Mason、LSP 配置、LspAttach 映射、hover 和引用行为 |
@@ -52,6 +52,8 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ## 已确认的交互
 
 ### 原生编辑器层
+
+- `Loadenv` 使用无启动配置的 Bash 子进程，以 `set -a` 执行 `source`，比较执行前后的 NUL 分隔环境快照，仅将变化和删除同步到 `vim.env`。脚本失败或未完成快照时不导入；Windows 优先标准位置的 Git Bash，避免 WSL 别名。变量只存在当前进程和之后启动的子进程中，已有终端/LSP 需重启；不导入函数、别名或工作目录变化。
 
 - Leader 是空格。普通和可视模式先吞掉未配置的单个可打印组合，实际映射再覆盖，因此 `Space+i` 不会回退执行原生 `i`，`Space+a` 超时也不会执行原生 `a`。
 - `Ctrl+a` 在普通和可视模式全选，插入模式保留原生“插入上次输入文本”；`Ctrl+n` 在普通和可视模式调用原生数字加一；Visual/Select 模式的 `Ctrl+c` 写入系统 `+` 剪贴板；`Ctrl+v` 在普通、插入、Visual/Select 和终端输入模式通过 `nvim_paste()` 粘贴系统 `+` 剪贴板，命令行使用原生寄存器插入，块选择改用原生 `Ctrl+q`；`Ctrl+s` 保存，插入模式会先退出；`Ctrl+z` / `Ctrl+Shift+z` 在普通、插入、Visual/Select 模式撤销 / 重做。

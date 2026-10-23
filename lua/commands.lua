@@ -1,5 +1,53 @@
 local messages_win = nil
 
+vim.api.nvim_create_user_command("Loadenv", function(opts)
+    local path = vim.fn.fnamemodify(vim.fn.expand(opts.args), ":p")
+    if vim.fn.filereadable(path) ~= 1 then
+        error("Loadenv: 文件不可读: " .. path)
+    end
+    local bash = "bash"
+    -- Windows 的 bash 别名可能指向 WSL；优先使用本机 Git Bash。
+    if vim.fn.has("win32") == 1 then
+        local git_bash = (vim.env.ProgramFiles or "C:/Program Files") .. "/Git/bin/bash.exe"
+        if vim.fn.executable(git_bash) == 1 then
+            bash = git_bash
+        end
+    end
+    local result = vim.system({ bash, "--noprofile", "--norc", "-c", [[
+env -0
+set -a
+source "$1" >&2 || exit $?
+printf '\0'
+env -0
+]], "Loadenv", path }, { text = false }):wait()
+    local before, after = result.stdout:match("^(.-)%z%z(.*)$")
+    if result.code ~= 0 or not before or after == "" then
+        error("Loadenv: 加载失败: " .. (result.stderr or ""))
+    end
+    local function parse(data)
+        local env = {}
+        for entry in data:gmatch("[^%z]+") do
+            local key, value = entry:match("^([^=]+)=(.*)$")
+            if key then
+                env[key] = value
+            end
+        end
+        return env
+    end
+    local old, new = parse(before), parse(after)
+    for key, value in pairs(new) do
+        if value ~= old[key] then
+            vim.env[key] = value
+        end
+    end
+    for key in pairs(old) do
+        if new[key] == nil then
+            vim.env[key] = nil
+        end
+    end
+    vim.notify("Loadenv: 已加载 " .. path)
+end, { nargs = 1, complete = "file", desc = "加载当前 Neovim 会话的环境变量" })
+
 vim.api.nvim_create_user_command("MessagesBuffer", function()
     -- 再次执行命令时关闭窗口
     if messages_win and vim.api.nvim_win_is_valid(messages_win) then

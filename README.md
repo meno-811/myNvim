@@ -27,11 +27,14 @@ bash ./install-nvim.sh
 | 命令 | 功能 |
 | --- | --- |
 | `:Config` | 新建浮动终端并进入 Neovim 配置目录 |
+| `:Loadenv path_of_file` | 用 Bash 加载环境变量，仅影响当前 Neovim 和之后启动的子进程 |
 | `:Readme` / `:readme` | 在浮窗中查看本文档，按 `q` 或 `Esc` 关闭 |
 | `:MessagesBuffer` | 在可滚动、可复制的浮窗中查看完整消息记录 |
 | `:Lazy` / `:Mason` / `:LspInfo` | 查看插件、外部工具和当前 LSP 状态 |
 
 `<Leader>` 是空格。未配置的 Leader 组合会被忽略，不会回退执行普通单键命令。
+
+`:Loadenv .env` 支持文件路径补全，含空格的路径直接输入，无需引号。文件按 Bash `source` 执行，并自动导出普通变量赋值；支持引号、变量引用、命令替换和 `unset`。仅加载可信文件。需要 Bash，Windows 优先使用标准安装位置的 Git Bash。退出 Neovim 后变量不保留，也不会修改父终端或系统环境；已经运行的终端、LSP 等需重启才能继承。只同步环境变量，不同步脚本中的目录切换、函数或别名；脚本失败时不导入环境，但已经执行的外部操作不会回滚。
 
 ## 编辑与导航
 
