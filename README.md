@@ -116,3 +116,6 @@ Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口；未完成的 `
 | `<Leader>m`（Markdown） | 切换终端内实时渲染 |
 
 Markdown 预览是终端内渲染，不提供浏览器式字号和图片排版。
+
+另附claude code官方下载命令
+curl -fsSL https://claude.ai/install.sh | bash
