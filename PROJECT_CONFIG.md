@@ -1,6 +1,6 @@
 # Neovim 配置维护说明
 
-最后核对日期：2026-10-16
+最后核对日期：2026-10-19
 
 本文只记录当前结构、设计取舍、已确认行为和排错结论，不充当变更日志。面向用户的安装与操作说明放在 `README.md`。
 
@@ -56,13 +56,13 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - Leader 是空格。普通和可视模式先吞掉未配置的单个可打印组合，实际映射再覆盖，因此 `Space+i` 不会回退执行原生 `i`，`Space+a` 超时也不会执行原生 `a`。
 - `Ctrl+a` 在普通和可视模式全选，插入模式保留原生“插入上次输入文本”；`Ctrl+n` 在普通和可视模式调用原生数字加一；Visual/Select 模式的 `Ctrl+c` 写入系统 `+` 剪贴板；`Ctrl+v` 在普通、插入、Visual/Select 和终端输入模式通过 `nvim_paste()` 粘贴系统 `+` 剪贴板，命令行使用原生寄存器插入，块选择改用原生 `Ctrl+q`；`Ctrl+s` 保存，插入模式会先退出；`Ctrl+z` / `Ctrl+Shift+z` 在普通、插入、Visual/Select 模式撤销 / 重做。
 - `Alt+i` 在插入模式返回普通模式，在终端输入模式进入终端普通模式，作为统一的“退出当前输入状态”按键。
-- 普通模式保留原生 `Ctrl+o/i`（或 `Tab`）跳转列表后退/前进。`Ctrl+d` 改为三阶段诊断浮窗；LSP buffer 中的 `Ctrl+f` 改为三阶段 hover，其他 buffer 仍为原生整页向下。
+- 普通模式保留原生 `Ctrl+o/i`（或 `Tab`）跳转列表后退/前进。`Ctrl+d` 改为两阶段诊断浮窗；LSP buffer 中的 `Ctrl+f` 改为两阶段 hover，其他 buffer 仍为原生整页向下。
 - 普通和可视模式使用 `Ctrl+h/l` 跨单词、`Ctrl+k/j` 跨段落；所有文本模式可用 `Ctrl+左右` 跨单词、`Ctrl+上下` 跨段落。原生 `{` / `}` 已禁用，统一使用 Ctrl 加上下键；`Ctrl+l` 覆盖的清高亮、diff 更新和重绘不迁移，需要时使用 `:noh`、`:diffupdate`、`:redraw!`。
 - `keymodel=startsel` 与 `selectmode=key` 启用原生输入框式选择：在普通或插入模式按 Shift 加方向/Home/End/PageUp/PageDown 进入 Select 模式，进入后方向键和 Shift 加方向键都会继续调整选区，输入文字替换选区。普通、可视和 Select 模式的 `H/J/K/L` 等同于 `Shift+←/↓/↑/→`；Neo-tree 和操作符等待模式保留原生行为。
 - 文本 buffer 在首行继续按 `↑` 到第 1 列，在末行继续按 `↓` 到行尾。补全菜单可见或 `buftype` 非空时保留原生方向键行为。
 - 插入模式左右键可跨行；块选择通过 `virtualedit=block,onemore` 支持越过短行行尾。
 - 普通模式双击左键保留原生单词选择。插入模式点击另一窗口时先退出插入，防止 Neo-tree 继承插入模式或 Claude 直接进入终端输入模式。
-- 普通模式 `Ctrl+d` 打开当前行诊断，第二次进入浮窗，浮窗内第三次关闭。
+- 普通模式 `Ctrl+d` 打开并进入当前行诊断浮窗，再按关闭并返回。
 - 普通模式使用原生 `Ctrl+w` 窗口命令，不再添加全局 `Alt+w w` 别名。
 
 ### 自动命令
@@ -87,7 +87,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ### LSP、诊断与滚动条
 
 - Mason 安装 `gopls`、`pyright`、`lua_ls`、`rust_analyzer`。Python 由 Pyright 诊断、Black 格式化；Go 只用 gopls 格式化，避免重复 provider。
-- LSP buffer 中的 `Ctrl+f` 三阶段为打开 hover、进入浮窗、关闭；关闭映射只挂在带 `textDocument/hover` 标记的浮窗。
+- LSP buffer 中的 `Ctrl+f` 打开 hover 后自动进入浮窗，再按关闭；关闭映射只挂在带 `textDocument/hover` 标记的浮窗。
 - `grr` 不包含声明：0 个结果提示，1 个直接跳转，多个进入 quickfix，回车跳转后关闭列表。`gri` 跳转到实现；原生 `gi` 和 `gr` 前缀保持可用。
 - 支持 documentHighlight 的 LSP 在 `CursorHold` 高亮语义引用，移动时清除；滚动条读取引用 extmark。搜索滚动条使用 nvim-scrollbar 与 hlslens 官方集成。
 - `render-markdown.nvim` 只做终端内视觉渲染，不提供浏览器式字号、布局和图片能力。

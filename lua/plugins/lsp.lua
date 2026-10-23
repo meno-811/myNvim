@@ -29,7 +29,18 @@ return {
       -- cmp-nvim-lsp 默认已经包含 semantic tokens 的 capabilities
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- 第二次 Ctrl+f 进入 hover 浮窗后，第三次 Ctrl+f 关闭它。
+      -- hover 异步创建完成后进入浮窗，再按 Ctrl+f 关闭。
+      vim.api.nvim_create_autocmd("WinNew", {
+        group = vim.api.nvim_create_augroup("UserLspHoverFocus", { clear = true }),
+        callback = function()
+          local win = vim.api.nvim_get_current_win()
+          vim.schedule(function()
+            if vim.api.nvim_win_is_valid(win) and vim.w[win]["textDocument/hover"] then
+              vim.api.nvim_set_current_win(win)
+            end
+          end)
+        end,
+      })
       vim.api.nvim_create_autocmd("WinEnter", {
         group = vim.api.nvim_create_augroup("UserLspHover", { clear = true }),
         callback = function()
