@@ -60,6 +60,12 @@ return {
             end)
           end,
           keys = {
+            claude_toggleterm = {
+              [[<C-\>]],
+              "<Cmd>ToggleTerm<CR>",
+              mode = "t",
+              desc = "切换终端浮窗",
+            },
             claude_hide = {
               "<leader>q",
               function(self) self:hide() end,

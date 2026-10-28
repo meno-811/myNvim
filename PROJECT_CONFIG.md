@@ -100,6 +100,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - 独立 AstroCore 不初始化完整 AstroNvim 的 `vim.t.bufs`，所以 buffer 关闭统一使用 `Snacks.bufdelete({ wipe=true })`。它负责未保存提示、替代 buffer 和窗口布局。
 - `<Leader>q` 在普通文件中删除当前 buffer，在 quickfix/location-list 中关闭结果窗口；`:q` 仍是 Neovim 原义。`<Leader>ba` 关闭全部 buffer、`<Leader>bo` 仅保留当前 buffer 后，都会清空所有窗口的跳转列表。Neo-tree 成为最后一个窗口时不退出 Neovim。
 - Neo-tree 打开文件后通过 `file_opened` 事件自动关闭文件树。`Y` 复制名称、相对/绝对路径或 URI；这与插件的文件复制队列不是同一功能。`O`/`Shift+Enter` 使用 `vim.ui.open()`。
+- Neo-tree 局部 `↓` 在最后一项回到第一项；`Ctrl+↑/↓` 按可见节点搜索前/后深度不大于当前节点的目录，跳过文件和更深子目录，无目标时不移动。实现位于 `neo_tree.lua` 的 commands，使用节点深度和 renderer 聚焦，不解析显示缩进，也不改变展开状态。
 - Windows 关闭 Neo-tree 的 libuv watcher；LazyGit 退出后通过插件官方回调刷新已加载的 filesystem、git_status、diagnostics source。
 - Dropbar 只占普通文件窗口的 winbar，不进入 Neo-tree、Claude Code 或浮窗；全局开关会同步刷新已经打开的窗口。
 - `Alt+x` 在普通、插入、Visual/Select 和终端输入模式调用 Snacks 原生 zoom，为当前 buffer 叠加全屏浮窗；代码、Neo-tree、quickfix 和诊断/hover 浮窗共用同一入口，关闭后恢复原布局并同步光标。
@@ -109,6 +110,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - 全局 `Alt+i` 用于从终端输入模式进入终端普通模式，包括 Claude Code 终端。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
 - Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
 - Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航；未完成的 `Ctrl+w` 前缀超时后无操作，不会传入终端。
+- Claude 终端输入模式通过 `snacks_win_opts.keys` 局部映射 `Ctrl+\` 到 `ToggleTerm`，可直接打开或关闭终端浮窗，无需先按 `Alt+i`。
 - Claude 终端在输入或普通模式都可使用 `Alt+x` 切换 Snacks 全屏浮窗，底下的编辑窗口、buffer 和 Claude 进程都保留。
 - Claude 窗口里的 `<Leader>q` 调用窗口 `hide()`，保留 Claude 进程和 WebSocket；不要用删除 terminal buffer 代替隐藏。
 
