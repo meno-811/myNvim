@@ -1,4 +1,16 @@
 -- 文件树插件
+local function jump_directory(state, direction)
+  local node, row = state.tree:get_node()
+  if not node then return end
+  local depth = node:get_depth()
+  for line = row + direction, direction == -1 and 1 or vim.api.nvim_buf_line_count(state.bufnr), direction do
+    local target = state.tree:get_node(line)
+    if target and target.type == "directory" and target:get_depth() <= depth then
+      require("neo-tree.ui.renderer").focus_node(state, target:get_id())
+      return
+    end
+  end
+end
 
 return {
   "nvim-neo-tree/neo-tree.nvim", -- 插件仓库
@@ -55,6 +67,14 @@ return {
       },
 
       commands = {
+        directory_up = function(state) jump_directory(state, -1) end,
+        directory_down = function(state) jump_directory(state, 1) end,
+        wrap_down = function(state)
+          local row = vim.api.nvim_win_get_cursor(state.winid)[1]
+          local last = vim.api.nvim_buf_line_count(state.bufnr)
+          local target = state.tree:get_node(row == last and 1 or row + 1)
+          if target then require("neo-tree.ui.renderer").focus_node(state, target:get_id()) end
+        end,
         -- 使用 Neovim 的 UI 打开文件（跨平台）
         system_open = function(state)
           vim.ui.open(state.tree:get_node():get_id())
@@ -108,6 +128,9 @@ return {
       window = {
         width = 30, -- 侧边栏宽度
         mappings = {
+          ["<Down>"] = "wrap_down",
+          ["<C-Up>"] = "directory_up",
+          ["<C-Down>"] = "directory_down",
           -- ["<BS>"] = false,
           ["<bs>"] = false,
           ["<S-CR>"] = "system_open", -- Shift+Enter 使用 system_open
