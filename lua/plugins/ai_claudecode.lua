@@ -62,7 +62,7 @@ return {
           keys = {
             claude_toggleterm = {
               [[<C-\>]],
-              "<Cmd>ToggleTerm<CR>",
+              function() vim.cmd("ToggleTerm") end,
               mode = "t",
               desc = "切换终端浮窗",
             },
