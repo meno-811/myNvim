@@ -198,6 +198,9 @@ return {
         capabilities = capabilities,
         settings = {
           python = {
+            -- 让 pyright 用工作区根目录下的 .venv 解析第三方包，而不是 PATH 上的 python
+            venvPath = ".",
+            venv = ".venv",
             analysis = {
               diagnosticMode = "workspace",
             },
