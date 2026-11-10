@@ -93,7 +93,7 @@ vim.api.nvim_create_user_command("MessagesBuffer", function()
         messages_win = nil
     end
 
-    for _, key in ipairs({ "q", "<Esc>" }) do
+    for _, key in ipairs({ "q", "<Esc>", "<Leader>q" }) do
         vim.keymap.set("n", key, close, {
             buffer = buf,
             silent = true,
@@ -160,7 +160,7 @@ vim.api.nvim_create_user_command("Readme", function()
         readme_win = nil
     end
 
-    for _, key in ipairs({ "q", "<Esc>" }) do
+    for _, key in ipairs({ "q", "<Esc>", "<Leader>q" }) do
         vim.keymap.set("n", key, close, {
             buffer = buf,
             silent = true,

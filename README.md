@@ -29,7 +29,7 @@ bash ./install-nvim.sh
 | `:Config` | 新建浮动终端并进入 Neovim 配置目录 |
 | `:Loadenv path_of_file` | 用 Bash 加载环境变量，仅影响当前 Neovim 和之后启动的子进程 |
 | `:Readme` / `:readme` | 在浮窗中查看本文档，按 `q` 或 `Esc` 关闭 |
-| `:MessagesBuffer` | 在可滚动、可复制的浮窗中查看完整消息记录 |
+| `:MessagesBuffer` | 在浮窗中查看完整消息记录，按 `q`、`Esc` 或 `<Leader>q` 关闭 |
 | `:Lazy` / `:Mason` / `:LspInfo` | 查看插件、外部工具和当前 LSP 状态 |
 
 `<Leader>` 是空格。未配置的 Leader 组合会被忽略，不会回退执行普通单键命令。
