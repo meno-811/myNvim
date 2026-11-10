@@ -1,14 +1,19 @@
 -- Claude Code IDE 集成：终端、上下文发送和 diff 审阅。
+local history = require("utils.claude_history")
 local function focus_claude_insert(retries)
   local ok, terminal = pcall(require, "claudecode.terminal")
   local bufnr = ok and terminal.get_active_terminal_bufnr() or nil
 
   if bufnr then
-    for _, winid in ipairs(vim.api.nvim_list_wins()) do
+    local current = vim.api.nvim_get_current_win()
+    if vim.api.nvim_win_get_buf(current) == bufnr then
+      history.start_input(current)
+      return
+    end
+    for _, winid in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
       local win_config = vim.api.nvim_win_get_config(winid)
       if vim.api.nvim_win_get_buf(winid) == bufnr and win_config.hide ~= true then
-        vim.api.nvim_set_current_win(winid)
-        vim.cmd("startinsert")
+        history.start_input(winid)
         return
       end
     end
@@ -45,6 +50,7 @@ return {
     "coder/claudecode.nvim",
     dependencies = { "folke/snacks.nvim" },
     opts = {
+      terminal_cmd = history.terminal_command(),
       terminal = {
         git_repo_cwd = true,
         auto_insert = false,
@@ -52,6 +58,28 @@ return {
           on_buf = function(self)
             vim.schedule(function()
               if not vim.api.nvim_buf_is_valid(self.buf) then return end
+              local group = vim.api.nvim_create_augroup("ClaudeHistory", { clear = false })
+              vim.api.nvim_clear_autocmds({ group = group, buffer = self.buf })
+              vim.api.nvim_create_autocmd("WinEnter", {
+                group = group,
+                buffer = self.buf,
+                callback = function() history.on_enter(self.buf) end,
+              })
+              vim.api.nvim_create_autocmd("TermClose", {
+                group = group,
+                buffer = self.buf,
+                once = true,
+                callback = function(event) history.on_exit(event.buf) end,
+              })
+              vim.keymap.set({ "n", "x", "t" }, "<A-x>", function()
+                local input = vim.fn.mode() == "t"
+                history.zoom(self.buf, input and vim.cmd.startinsert or nil)
+              end, { buffer = self.buf, desc = "切换 Claude 全屏" })
+              vim.keymap.set("t", "<A-i>", function()
+                local terminal = self.buf
+                vim.cmd([[stopinsert]])
+                vim.schedule(function() history.open(terminal) end)
+              end, { buffer = self.buf, desc = "阅读 Claude 终端历史" })
               vim.keymap.set("t", "<C-w>", "<Nop>", {
                 buffer = self.buf,
                 nowait = false,
@@ -167,7 +195,7 @@ return {
         claude_toggle_insert,
         desc = "切换 Claude Code",
       },
-      { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "聚焦 Claude Code" },
+      { "<leader>af", claude_open_insert, desc = "聚焦 Claude Code 并输入" },
       { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "恢复 Claude 会话" },
       { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "继续 Claude 会话" },
       { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "选择 Claude 模型" },

@@ -104,8 +104,9 @@ Neo-tree 中最后一项再按 `↓` 回到第一项。`Ctrl+↑/↓` 跳到前�
 | 快捷键 | 功能 |
 | --- | --- |
 | `Ctrl+\` | 打开或关闭 ToggleTerm；Claude Code 终端输入模式下也可直接使用 |
-| `Alt+i`（终端输入模式） | 进入终端普通模式 |
+| `Alt+i`（终端输入模式） | Claude Code 显示历史视图，其他终端进入普通模式 |
 | `<Leader>ac` | 打开或切换 Claude Code，并进入输入状态 |
+| `<Leader>af` | 聚焦 Claude Code 并进入输入状态 |
 | `<Leader>as` | 发送选区、添加文件或聚焦 Claude Code，并进入输入状态 |
 | `<Leader>ab` | 添加当前 buffer |
 | `<Leader>ar` / `<Leader>aC` | 恢复 / 继续 Claude 会话 |
@@ -124,3 +125,8 @@ Markdown 预览是终端内渲染，不提供浏览器式字号和图片排版�
 
 另附claude code官方下载命令
 curl -fsSL https://claude.ai/install.sh | bash
+
+## Claude 历史视图修正
+由于claude code有一些窗口适配问题，由于是Claude code自己的问题，不管是nvim还是claude code插件都无法解决这个问题。所以通过直接读取.claude里的历史文件获取文本并做成了一个浮窗展示伪装成claude 的所有非插件模式。由于完全没有更改操作途径，所以这里仅作简单说明
+
+Claude 进程退出时，历史和全屏浮窗随终端一起关闭。

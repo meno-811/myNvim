@@ -108,7 +108,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ### 终端与 Claude Code
 
 - 全局 `Alt+i` 用于从终端输入模式进入终端普通模式，包括 Claude Code 终端。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。
-- Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
+- Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>af`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
 - Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航；未完成的 `Ctrl+w` 前缀超时后无操作，不会传入终端。
 - Claude 终端输入模式通过 `snacks_win_opts.keys` 局部映射 `Ctrl+\` 到 `ToggleTerm`，可直接打开或关闭终端浮窗，无需先按 `Alt+i`。
 - Claude 终端在输入或普通模式都可使用 `Alt+x` 切换 Snacks 全屏浮窗，底下的编辑窗口、buffer 和 Claude 进程都保留。
@@ -175,3 +175,13 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - 尚需实际体验验证：hlslens 搜索滚动条、Snacks 对多个未保存 buffer 的提示、LazyGit 退出后的 Neo-tree 即时刷新。
 
 排查时先从“文件职责”定位唯一负责模块，再检查原始错误，避免在多个文件叠加补丁。
+
+## Claude 历史视图
+
+- Claude CLI 通过 `--settings` 加载 `SessionStart` 钩子。Windows 和 Linux 共用 `nvim -l claude-session.lua`。钩子将当前会话的 `transcript_path` 写入本次 Neovim 实例的临时文件。
+- `lua/utils/claude_history.lua` 从 JSONL 提取用户和助手文本，用 Markdown 渲染；记录不可用时回退到终端快照。只读浮窗覆盖原终端，按 `i` 或使用快捷键返回终端输入时关闭，切窗时保留，底层终端窗口关闭时清理。
+- Claude 终端和历史缓冲区各自绑定局部 `Alt+x`，共用底层 Snacks zoom 状态。退出全屏时重新聚焦 Claude 侧栏。历史浮窗按新尺寸显示同一份内容并保留光标位置。
+
+Claude 终端的缓冲区局部 WinEnter 在焦点稳定后检查普通模式并打开历史浮窗。显式进入终端输入会取消尚未执行的历史打开请求。浮窗底部提示条是只读界面的一部分。
+
+Claude 进程退出时，TermClose 清理附属历史浮窗和 Snacks 全屏浮窗；侧栏由插件关闭。
