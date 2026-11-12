@@ -48,6 +48,7 @@ bash ./install-nvim.sh
 | `Ctrl+s` | 保存；插入模式下保存并返回普通模式 |
 | `Ctrl+z` / `Ctrl+Shift+z` | 撤销 / 重做 |
 | `Alt+i`（插入模式） | 返回普通模式 |
+| `Alt+·`（Termius） | 等同于 `Esc` |
 | `Ctrl+h/l`（普通 / 可视）或 `Ctrl+←/→` | 上一个 / 下一个单词 |
 | `Ctrl+k/j`（普通 / 可视）或 `Ctrl+↑/↓` | 上一个 / 下一个段落 |
 | `Shift+方向键` | 像普通输入框一样开始或扩展选区 |
