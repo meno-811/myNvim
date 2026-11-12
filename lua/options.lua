@@ -24,7 +24,7 @@ local options = {
     virtualedit = "block,onemore",
     whichwrap = "b,s,<,>,h,l",
     mouse = "a",
-    clipboard = "unnamedplus",
+    -- clipboard = "unnamedplus",
 }
 
 for name, value in pairs(options) do
