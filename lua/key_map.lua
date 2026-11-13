@@ -89,6 +89,14 @@ map("i", "<C-Right>", "<C-o>w", { desc = "Move to next word" })
 map("i", "<C-Up>", "<C-o>{", { desc = "Move to previous paragraph" })
 map("i", "<C-Down>", "<C-o>}", { desc = "Move to next paragraph" })
 
+-- Select 模式下的 Shift+Ctrl+方向键与普通模式保持同一套词/段语义。
+-- 原生 <C-Right>/<C-Left> 是 W/B（按空白分 WORDS），普通模式映射成了 w/b，两者距离不同；
+-- <C-o> 让动作执行后仍留在 Select 模式。
+map("s", "<C-S-Right>", "<C-o>w", { desc = "Extend selection by word" })
+map("s", "<C-S-Left>", "<C-o>b", { desc = "Extend selection by word backward" })
+map("s", "<C-S-Down>", "<C-o>}", { desc = "Extend selection by paragraph" })
+map("s", "<C-S-Up>", "<C-o>{", { desc = "Extend selection by paragraph backward" })
+
 -- 在文本窗口中让 Shift+hjkl 与 Shift+方向键一致；Neo-tree 保留自己的按键。
 for key, direction in pairs {
     H = "<S-Left>", J = "<S-Down>", K = "<S-Up>", L = "<S-Right>",
@@ -100,7 +108,7 @@ end
 
 -- Select 模式下松开 Shift 的移动键先退出选择再移动，和普通输入框一致。
 -- 不用 keymodel+=stopsel：它也会让可视模式里未按 Shift 的方向键退出选择。
--- Shift+Ctrl+方向键仍走原生行为，保持 Select 并按单词/段落扩展。
+-- Shift+Ctrl+方向键在本块之前已有保持 Select 的映射。
 for _, key in ipairs {
     "<Left>", "<Right>", "<Up>", "<Down>",
     "<Home>", "<End>", "<PageUp>", "<PageDown>",

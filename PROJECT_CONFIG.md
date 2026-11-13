@@ -64,6 +64,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - 普通和可视模式使用 `Ctrl+h/l` 跨单词、`Ctrl+k/j` 跨段落；所有文本模式可用 `Ctrl+左右` 跨单词、`Ctrl+上下` 跨段落。原生 `{` / `}` 已禁用，统一使用 Ctrl 加上下键；`Ctrl+l` 覆盖的清高亮、diff 更新和重绘不迁移，需要时使用 `:noh`、`:diffupdate`、`:redraw!`。
 - `keymodel=startsel` 与 `selectmode=key` 启用原生输入框式选择：在普通或插入模式按 Shift 加方向/Home/End/PageUp/PageDown 进入 Select 模式，输入文字替换选区。普通、可视和 Select 模式的 `H/J/K/L` 等同于 `Shift+←/↓/↑/→`；Neo-tree 和操作符等待模式保留原生行为。
 - Select 模式下未按 Shift 的移动键（方向键、Home/End/PageUp/PageDown 及其 Ctrl 组合）在 `key_map.lua` 里映射为先 `<Esc>` 再执行原键，因此松开 Shift 后移动会退出选择。没有使用 `keymodel+=stopsel`：`stopsel` 同样作用于可视模式，会让 `v`/`V` 里未按 Shift 的方向键直接退出选择，而本配置要求可视模式保持粘滞。
+- `Shift+Ctrl+方向键` 保持 Select 并按单词/段落扩展。原生 `Shift+Ctrl+左右` 对应 `W`/`B`（按空白分 WORDS），与普通模式使用的 `w`/`b` 距离不同，因此在 Select 模式单独映射为 `<C-o>w`/`<C-o>b`/`<C-o>}`/`<C-o>{`；`<C-o>` 保证动作执行后仍留在 Select。实测 Termius 会把 `Ctrl+Shift+→` 作为独立的 `<C-S-Right>` 传入（字节 `80 fc 04 80 25 69`），`Ctrl+Shift+↑/↓` 未逐一验证。
 - 文本 buffer 在首行继续按 `↑` 到第 1 列，在末行继续按 `↓` 到行尾。补全菜单可见或 `buftype` 非空时保留原生方向键行为。
 - 插入模式左右键可跨行；块选择通过 `virtualedit=block,onemore` 支持越过短行行尾。
 - 普通模式双击左键保留原生单词选择。插入模式点击另一窗口时先退出插入，防止 Neo-tree 继承插入模式或 Claude 直接进入终端输入模式。
@@ -143,7 +144,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - `<Leader>b` 同时是 DAP 断点和 `<Leader>ba/bo` 前缀，单独使用可能等待 `timeoutlen`。
 - `Ctrl+Shift+z`、`Shift+Enter` 等组合是否可区分取决于终端和键盘协议；无法区分时 Neovim 收不到独立按键码。
 - Shift 选择同样依赖终端能够区分 Shift 修饰的方向键及 Home/End/PageUp/PageDown。
-- 当前终端不会把 `Ctrl+Shift+↑/↓` 传给 Neovim，因此不能用它们按段落开始或继续 Select；不要在 Neovim 内重复添加该组合的映射，除非先修改终端按键协议或绑定。
+- 当前终端不会把 `Ctrl+Shift+↑/↓` 传给 Neovim（2026-11-13 前实测），因此不能用它们按段落继续 Select；`Ctrl+Shift+←/→` 已确认可区分。不要在 Neovim 内给 `Ctrl+Shift+↑/↓` 添加映射，除非先确认终端按键协议已支持。
 - 鼠标、Claude、Neo-tree、诊断/hover 浮窗和 quickfix 的特殊映射均限制在相应模式或 buffer，不能提升成全局映射。
 
 ## 环境与排错结论

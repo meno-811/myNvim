@@ -60,7 +60,7 @@ bash ./install-nvim.sh
 
 原生 `{` / `}` 已禁用，段落移动统一使用 `Ctrl+k/j` 或 `Ctrl+↑/↓`。`Ctrl+l` 覆盖的原生清高亮、diff 更新和重绘不迁移，需要时分别使用 `:noh`、`:diffupdate`、`:redraw!`。
 
-Shift 选择使用 Neovim Select 模式：按 `Shift+方向键` 或 `Shift+Home/End/PageUp/PageDown` 开始选区，按住 Shift 继续扩大；松开 Shift 后按移动键会退出选择并照常移动。`Shift+Ctrl+方向键` 在保持选区的同时按单词/段落移动。直接输入会替换选中内容，`Esc` 取消选择。
+Shift 选择使用 Neovim Select 模式：按 `Shift+方向键` 或 `Shift+Home/End/PageUp/PageDown` 开始选区，按住 Shift 继续扩大；松开 Shift 后按移动键会退出选择并照常移动。`Shift+Ctrl+方向键` 在保持选区的同时按单词/段落移动，距离与普通模式的 `Ctrl+方向键` 一致。直接输入会替换选中内容，`Esc` 取消选择。
 
 多行插入相同内容：`Ctrl+q` 选择多行，按大写 `I` 输入，最后按 `Esc` 应用到全部选中行。
 
