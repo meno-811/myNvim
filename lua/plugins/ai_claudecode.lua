@@ -60,11 +60,6 @@ return {
               if not vim.api.nvim_buf_is_valid(self.buf) then return end
               local group = vim.api.nvim_create_augroup("ClaudeHistory", { clear = false })
               vim.api.nvim_clear_autocmds({ group = group, buffer = self.buf })
-              vim.api.nvim_create_autocmd("WinEnter", {
-                group = group,
-                buffer = self.buf,
-                callback = function() history.on_enter(self.buf) end,
-              })
               vim.api.nvim_create_autocmd("TermClose", {
                 group = group,
                 buffer = self.buf,
@@ -75,10 +70,8 @@ return {
                 local input = vim.fn.mode() == "t"
                 history.zoom(self.buf, input and vim.cmd.startinsert or nil)
               end, { buffer = self.buf, desc = "切换 Claude 全屏" })
-              vim.keymap.set("t", "<A-i>", function()
-                local terminal = self.buf
-                vim.cmd([[stopinsert]])
-                vim.schedule(function() history.open(terminal) end)
+              vim.keymap.set("n", "<Leader>m", function()
+                history.open(self.buf)
               end, { buffer = self.buf, desc = "阅读 Claude 终端历史" })
               vim.keymap.set("t", "<C-w>", "<Nop>", {
                 buffer = self.buf,

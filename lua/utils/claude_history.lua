@@ -1,13 +1,9 @@
 local M = {}
 local marker
-local internal_focus = false
-local pending_entry
 local history_windows = {}
 
 local function focus_terminal(win)
-  internal_focus = true
   vim.api.nvim_set_current_win(win)
-  internal_focus = false
 end
 
 local function close_history(win)
@@ -18,8 +14,6 @@ local function close_history(win)
 end
 
 function M.start_input(win)
-  -- ClaudeCodeOpen may already have queued a normal-mode WinEnter.
-  pending_entry = nil
   -- Focus Claude first so Snacks does not close zoom on entering the editor.
   focus_terminal(win)
   close_history(win)
@@ -27,27 +21,12 @@ function M.start_input(win)
 end
 
 function M.on_exit(terminal)
-  pending_entry = nil
   local windows = vim.fn.win_findbuf(terminal)
   local zoom = Snacks.zen.win
   local close_zoom = zoom and vim.tbl_contains(windows, zoom.win)
   vim.schedule(function()
     for _, win in ipairs(windows) do close_history(win) end
     if close_zoom and zoom:valid() then zoom:close() end
-  end)
-end
-
-function M.on_enter(terminal)
-  if internal_focus then return end
-  local win = vim.api.nvim_get_current_win()
-  local entry = {}
-  pending_entry = entry
-  vim.schedule(function()
-    if pending_entry ~= entry then return end
-    pending_entry = nil
-    if vim.api.nvim_get_current_win() == win and vim.fn.mode() == "n" then
-      M.open(terminal)
-    end
   end)
 end
 
@@ -103,9 +82,7 @@ function M.zoom(terminal, on_focus)
     end
   end
 
-  internal_focus = true
   Snacks.zen.zoom()
-  internal_focus = false
   if sidebar or on_focus then
     vim.schedule(function()
       if sidebar and vim.api.nvim_win_is_valid(sidebar)
