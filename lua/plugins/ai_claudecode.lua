@@ -198,7 +198,8 @@ return {
         claude_toggle_insert,
         desc = "切换 Claude Code",
       },
-      { "<leader>af", claude_open_insert, desc = "聚焦 Claude Code 并输入" },
+      -- 任意 buffer 的 Visual 模式同样可用；其他模式仍只由 <Leader>as 处理选区。
+      { "<leader>af", claude_open_insert, mode = { "n", "x" }, desc = "聚焦 Claude Code 并输入" },
       { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "恢复 Claude 会话" },
       { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "继续 Claude 会话" },
       { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "选择 Claude 模型" },

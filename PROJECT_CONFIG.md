@@ -113,7 +113,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ### 终端与 Claude Code
 
 - 全局 `Alt+i` 用于从终端输入模式进入终端普通模式，包括 Claude Code 终端。`:Config` 新建受 ToggleTerm 管理的浮动终端，工作目录为 `stdpath("config")`，可被 `Ctrl+\` 和 `:TermSelect` 管理。ToggleTerm 的 `open_mapping` 只注册普通、插入和终端模式，可视模式由 `term.lua` 单独映射到 `<Cmd>ToggleTerm<CR>`；浮窗打开时离开其终端 buffer 会被 ToggleTerm 自动关闭，因此从可视模式也能用它收起浮窗。
-- Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>af`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。
+- Claude Code 设置 `auto_insert=false`；`<Leader>ac`、`<Leader>af`、`<Leader>as` 的包装函数在明确打开、发送或添加后才聚焦并进入输入模式。普通鼠标切窗不会自动进入输入模式。`<Leader>af` 注册在普通与可视模式，因此在任意 buffer 的选区内按它都能离开选区并聚焦 Claude。
 - Claude 终端三种离开状态由 `lua/utils/claude_history.lua` 记忆并在 `WinEnter` 后恢复：输入态离开 → 回来恢复输入态；普通态离开 → 回来保持普通态；历史浮窗离开 → 回来重新打开历史浮窗。浮窗的 `WinLeave` 会把状态记为 `float`，因此从浮窗切到别的窗口再回到 Claude，会回到浮窗而不是终端。`restoring` 守卫防止脚本内的切窗（`start_input`、关闭浮窗、恢复浮窗）反向改写状态。直接在 `WinEnter` 回调里 `startinsert()` 不生效，必须 `vim.schedule` 回到主循环。
 - Claude 终端内 `Ctrl+w` 后接 `h/j/k/l/w`、相应 Ctrl 组合或方向键进行窗口导航；未完成的 `Ctrl+w` 前缀超时后无操作，不会传入终端。
 - Claude 终端输入模式通过 `snacks_win_opts.keys` 局部映射 `Ctrl+\` 到 `ToggleTerm`，可直接打开或关闭终端浮窗，无需先按 `Alt+i`。
