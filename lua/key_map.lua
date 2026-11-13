@@ -98,6 +98,17 @@ for key, direction in pairs {
     end, { expr = true, silent = true, desc = "Select with " .. direction })
 end
 
+-- Select 模式下松开 Shift 的移动键先退出选择再移动，和普通输入框一致。
+-- 不用 keymodel+=stopsel：它也会让可视模式里未按 Shift 的方向键退出选择。
+-- Shift+Ctrl+方向键仍走原生行为，保持 Select 并按单词/段落扩展。
+for _, key in ipairs {
+    "<Left>", "<Right>", "<Up>", "<Down>",
+    "<Home>", "<End>", "<PageUp>", "<PageDown>",
+    "<C-Left>", "<C-Right>", "<C-Up>", "<C-Down>", "<C-Home>", "<C-End>",
+} do
+    map("s", key, "<Esc>" .. key, { remap = true, desc = "Leave Select then move" })
+end
+
 map("i", "<Left>", function()
     return vim.fn.pumvisible() == 1 and "<Left>" or "<C-o>h"
 end, { expr = true, silent = true, desc = "Move left across line boundaries" })

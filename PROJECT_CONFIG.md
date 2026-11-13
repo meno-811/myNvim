@@ -62,7 +62,8 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - Termius 的 `Alt+·` 实测识别为 Alt 加反引号，在 `key_map.lua` 映射为 `Esc`。
 - 普通模式保留原生 `Ctrl+o/i`（或 `Tab`）跳转列表后退/前进。`Ctrl+d` 改为两阶段诊断浮窗；LSP buffer 中的 `Ctrl+f` 改为两阶段 hover，其他 buffer 仍为原生整页向下。
 - 普通和可视模式使用 `Ctrl+h/l` 跨单词、`Ctrl+k/j` 跨段落；所有文本模式可用 `Ctrl+左右` 跨单词、`Ctrl+上下` 跨段落。原生 `{` / `}` 已禁用，统一使用 Ctrl 加上下键；`Ctrl+l` 覆盖的清高亮、diff 更新和重绘不迁移，需要时使用 `:noh`、`:diffupdate`、`:redraw!`。
-- `keymodel=startsel` 与 `selectmode=key` 启用原生输入框式选择：在普通或插入模式按 Shift 加方向/Home/End/PageUp/PageDown 进入 Select 模式，进入后方向键和 Shift 加方向键都会继续调整选区，输入文字替换选区。普通、可视和 Select 模式的 `H/J/K/L` 等同于 `Shift+←/↓/↑/→`；Neo-tree 和操作符等待模式保留原生行为。
+- `keymodel=startsel` 与 `selectmode=key` 启用原生输入框式选择：在普通或插入模式按 Shift 加方向/Home/End/PageUp/PageDown 进入 Select 模式，输入文字替换选区。普通、可视和 Select 模式的 `H/J/K/L` 等同于 `Shift+←/↓/↑/→`；Neo-tree 和操作符等待模式保留原生行为。
+- Select 模式下未按 Shift 的移动键（方向键、Home/End/PageUp/PageDown 及其 Ctrl 组合）在 `key_map.lua` 里映射为先 `<Esc>` 再执行原键，因此松开 Shift 后移动会退出选择。没有使用 `keymodel+=stopsel`：`stopsel` 同样作用于可视模式，会让 `v`/`V` 里未按 Shift 的方向键直接退出选择，而本配置要求可视模式保持粘滞。
 - 文本 buffer 在首行继续按 `↑` 到第 1 列，在末行继续按 `↓` 到行尾。补全菜单可见或 `buftype` 非空时保留原生方向键行为。
 - 插入模式左右键可跨行；块选择通过 `virtualedit=block,onemore` 支持越过短行行尾。
 - 普通模式双击左键保留原生单词选择。插入模式点击另一窗口时先退出插入，防止 Neo-tree 继承插入模式或 Claude 直接进入终端输入模式。
