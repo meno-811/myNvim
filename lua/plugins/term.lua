@@ -13,6 +13,9 @@ return {
                 direction = "float",
             })
 
+            -- ToggleTerm 自带 n/i/t 的 open_mapping，不含可视模式。
+            vim.keymap.set("x", [[<C-\>]], "<Cmd>ToggleTerm<CR>", { desc = "切换终端浮窗" })
+
             vim.api.nvim_create_user_command("Config", function()
                 local term = Terminal:new({
                     dir = vim.fn.stdpath("config"),

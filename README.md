@@ -108,7 +108,7 @@ Neo-tree 中最后一项再按 `↓` 回到第一项。`Ctrl+↑/↓` 跳到前�
 
 | 快捷键 | 功能 |
 | --- | --- |
-| `Ctrl+\` | 打开或关闭 ToggleTerm；Claude Code 终端输入模式下也可直接使用 |
+| `Ctrl+\` | 打开或关闭 ToggleTerm（普通、插入、可视和终端输入模式）；Claude Code 终端输入模式下也可直接使用 |
 | `Alt+i`（终端输入模式） | 进入终端普通模式；Claude Code 历史视图改为普通模式下按 `<Leader>m` |
 | `<Leader>ac` | 打开或切换 Claude Code，并进入输入状态 |
 | `<Leader>af` | 聚焦 Claude Code 并进入输入状态 |
