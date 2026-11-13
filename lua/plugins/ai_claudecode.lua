@@ -60,6 +60,16 @@ return {
               if not vim.api.nvim_buf_is_valid(self.buf) then return end
               local group = vim.api.nvim_create_augroup("ClaudeHistory", { clear = false })
               vim.api.nvim_clear_autocmds({ group = group, buffer = self.buf })
+              vim.api.nvim_create_autocmd("WinLeave", {
+                group = group,
+                buffer = self.buf,
+                callback = function() history.leave() end,
+              })
+              vim.api.nvim_create_autocmd("WinEnter", {
+                group = group,
+                buffer = self.buf,
+                callback = function() history.enter(self.buf) end,
+              })
               vim.api.nvim_create_autocmd("TermClose", {
                 group = group,
                 buffer = self.buf,

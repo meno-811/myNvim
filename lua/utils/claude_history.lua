@@ -1,22 +1,54 @@
 local M = {}
 local marker
 local history_windows = {}
+-- 离开 Claude 区域时的状态：调用方切窗时不应改写它。
+local state
+local restoring = false
 
 local function focus_terminal(win)
+  restoring = true
   vim.api.nvim_set_current_win(win)
+  restoring = false
 end
 
 local function close_history(win)
   local view = history_windows[win]
   if view and vim.api.nvim_win_is_valid(view) then
+    state = nil
     vim.api.nvim_win_close(view, true)
   end
 end
 
+function M.leave()
+  if restoring then return end
+  state = vim.fn.mode() == "t" and "insert" or "normal"
+end
+
+function M.enter(terminal)
+  if restoring or vim.api.nvim_get_current_buf() ~= terminal then return end
+  if state == "float" then
+    vim.schedule(function()
+      if vim.api.nvim_get_current_buf() ~= terminal then return end
+      restoring = true
+      M.open(terminal)
+      restoring = false
+    end)
+  elseif state == "insert" then
+    vim.schedule(function()
+      if vim.api.nvim_get_current_buf() == terminal and vim.fn.mode() == "n" then
+        vim.cmd.startinsert()
+      end
+    end)
+  end
+end
+
 function M.start_input(win)
-  -- Focus Claude first so Snacks does not close zoom on entering the editor.
-  focus_terminal(win)
+  restoring = true
   close_history(win)
+  -- Focus Claude first so Snacks does not close zoom on entering the editor.
+  vim.api.nvim_set_current_win(win)
+  restoring = false
+  state = "insert"
   vim.cmd.startinsert()
 end
 
@@ -139,6 +171,13 @@ function M.open(terminal, lines, cursor, markdown)
   })
 
   history_windows[win] = view
+  state = "float"
+  vim.api.nvim_create_autocmd("WinLeave", {
+    buffer = history,
+    callback = function()
+      if not restoring then state = "float" end
+    end,
+  })
 
   local function return_to_terminal()
     local valid = vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == terminal
@@ -164,9 +203,12 @@ function M.open(terminal, lines, cursor, markdown)
     callback = function(event)
       history_windows[win] = nil
       if tonumber(event.match) == win then
+        state = nil
         vim.schedule(function()
           if vim.api.nvim_win_is_valid(view) then vim.api.nvim_win_close(view, true) end
         end)
+      elseif tonumber(event.match) == view then
+        state = nil
       end
       return true
     end,
