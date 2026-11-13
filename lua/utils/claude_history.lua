@@ -79,7 +79,7 @@ local function transcript_lines()
       local blocks = type(content) == "string" and { { type = "text", text = content } } or content
       for _, block in ipairs(type(blocks) == "table" and blocks or {}) do
         if type(block) == "table" and block.type == "text" and type(block.text) == "string" then
-          vim.list_extend(lines, { entry.type == "user" and "## 你" or "## Claude", "" })
+          vim.list_extend(lines, { entry.type == "user" and "# 你" or "# Claude", "" })
           vim.list_extend(lines, vim.split(block.text, "\n", { plain = true }))
           table.insert(lines, "")
         end
