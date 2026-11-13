@@ -30,11 +30,12 @@ map({ "n", "v" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save file" })
 map("i", "<C-s>", "<Esc><Cmd>write<CR>", { desc = "Save file and leave insert mode" })
 map({ "n", "x" }, "<C-a>", "ggVG", { desc = "Select all" })
 map({ "n", "x" }, "<C-n>", "<C-a>", { desc = "Increment number" })
--- 系统剪贴板只走 Ctrl+c / Ctrl+v；原生 y/yy/p 仍使用内部寄存器。
--- 可视与 Select 模式用 <C-g> 开头，避免 Select 模式把可打印字符当作输入。
+-- Ctrl+c 等同原生 y；y/yy 与 Ctrl+c 的内容都会同步到系统 + 剪贴板（见 autocmds.lua），
+-- p 仍只用内部寄存器，只有 Ctrl+v 从系统剪贴板粘贴。
+-- Select 模式用 <C-g> 开头，避免把可打印字符当作输入。
 -- 普通模式 Ctrl+c 保留原生取消语义，不改成复制。
-map("v", "<C-c>", '"+y', { desc = "Copy selection to clipboard" })
-map("s", "<C-c>", '<C-g>"+y', { desc = "Copy selection to clipboard" })
+map("v", "<C-c>", "y", { desc = "Copy selection" })
+map("s", "<C-c>", "<C-g>y", { desc = "Copy selection" })
 map("n", "<C-v>", '"+p', { desc = "Paste clipboard" })
 map("v", "<C-v>", '"+p', { desc = "Paste clipboard over selection" })
 map("s", "<C-v>", '<C-g>"+p', { desc = "Paste clipboard over selection" })

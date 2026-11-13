@@ -57,7 +57,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - `Loadenv` 使用无启动配置的 Bash 子进程，以 `set -a` 执行 `source`，比较执行前后的 NUL 分隔环境快照，仅将变化和删除同步到 `vim.env`。脚本失败或未完成快照时不导入；Windows 优先标准位置的 Git Bash，避免 WSL 别名。变量只存在当前进程和之后启动的子进程中，已有终端/LSP 需重启；不导入函数、别名或工作目录变化。
 
 - Leader 是空格。普通和可视模式先吞掉未配置的单个可打印组合，实际映射再覆盖，因此 `Space+i` 不会回退执行原生 `i`，`Space+a` 超时也不会执行原生 `a`。
-- `Ctrl+a` 在普通和可视模式全选，插入模式保留原生“插入上次输入文本”；`Ctrl+n` 在普通和可视模式调用原生数字加一；`Ctrl+c` 在 Visual/Select 模式写入系统 `+` 剪贴板，普通模式保留原生取消语义；`Ctrl+v` 在普通模式 `"+p`、Visual/Select 模式 `"+p`（Select 模式加 `<C-g>` 前缀避免可打印字符被当成输入）、插入模式 `<C-r><C-o>+`、命令行 `<C-r>+`、终端输入模式 `nvim_paste()`；`'clipboard'` 未启用，原生 `y`/`yy`/`p` 只使用内部寄存器；块选择改用原生 `Ctrl+q`；`Ctrl+s` 保存，插入模式会先退出；`Ctrl+z` / `Ctrl+Shift+z` 在普通、插入、Visual/Select 模式撤销 / 重做。
+- `Ctrl+a` 在普通和可视模式全选，插入模式保留原生“插入上次输入文本”；`Ctrl+n` 在普通和可视模式调用原生数字加一；`Ctrl+c` 在 Visual/Select 模式等同原生 `y`（Select 模式加 `<C-g>` 前缀避免可打印字符被当成输入），普通模式保留原生取消语义；`Ctrl+v` 在普通模式 `"+p`、Visual/Select 模式 `"+p`（Select 模式加 `<C-g>` 前缀）、插入模式 `<C-r><C-o>+`、命令行 `<C-r>+`、终端输入模式 `nvim_paste()`；`'clipboard'` 未启用，`autocmds.lua` 的 `TextYankPost` 把 `operator == "y"` 的结果镜像到 `+` 寄存器，因此 `y`/`yy`/`Ctrl+c` 与 `Ctrl+v` 共用系统剪贴板，删除或修改操作不写剪贴板，`p` 仍只读内部寄存器；块选择改用原生 `Ctrl+q`；`Ctrl+s` 保存，插入模式会先退出；`Ctrl+z` / `Ctrl+Shift+z` 在普通、插入、Visual/Select 模式撤销 / 重做。
 - `Alt+i` 在插入模式返回普通模式，在终端输入模式进入终端普通模式，作为统一的“退出当前输入状态”按键。
 - Termius 的 `Alt+·` 实测识别为 Alt 加反引号，在 `key_map.lua` 映射为 `Esc`。
 - 普通模式保留原生 `Ctrl+o/i`（或 `Tab`）跳转列表后退/前进。`Ctrl+d` 改为两阶段诊断浮窗；LSP buffer 中的 `Ctrl+f` 改为两阶段 hover，其他 buffer 仍为原生整页向下。
@@ -81,6 +81,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 | `FocusGained`、`BufEnter`、`CursorHold` | `checktime` 检查磁盘变化；只有无本地未保存修改的文件会按 `autoread` 重载 |
 | 代码文件 `FileType` | Lua、Python、JavaScript、Go、Rust 关闭折行 |
 | 文本文件 `FileType` | Markdown、text、vimwiki 开启 `wrap` 和 `linebreak` |
+| `TextYankPost` | `operator == "y"` 且寄存器不是 `_` 时用 `setreg()` 把内容和类型写入 `+`；删除、修改和 `_` 寄存器不写剪贴板 |
 | `InsertEnter` / `InsertLeave` | 输入时隐藏诊断 virtual text，离开后恢复；标记和下划线始终保留 |
 
 ### 补全
@@ -137,6 +138,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - 文本窗口中的 `H/J/K/L` 覆盖屏幕顶端、合并行、关键词查询和屏幕底端，改为 Shift 选择；Neo-tree 和操作符等待模式不覆盖。
 - 普通模式 `Ctrl+d` 覆盖半页向下；LSP buffer 中的 `Ctrl+f` 覆盖整页向下。
 - `Ctrl+v` 覆盖普通模式块选择、插入模式字面量输入和命令行字面量输入，统一改为系统剪贴板粘贴；块选择改用 `Ctrl+q`，字面量输入需要时用 `Ctrl+q`/`<C-q>` 或终端能力自行输入。终端输入模式 `Ctrl+v` 也改为粘贴，原先给终端的原始按键不再透传。
+- `Ctrl+c` 在 Visual/Select 模式覆盖原生“退出选择”，改为与 `y` 相同的复制；取消选择需要时用 `Esc`。`TextYankPost` 镜像只处理 `y` 类操作，`dd`、`cw` 等仍不改动剪贴板。
 - 普通和可视模式 `Ctrl+a` 覆盖数字递增，改用 `Ctrl+n` 加一；插入模式 `Ctrl+a` 保持原生。`Ctrl+x` 的递减仍保留。可视模式原生的 `g<C-a>` / `g<C-x>` 序列递增/递减仍可使用，但需以实际终端按键传输为准。
 - `Ctrl+z` 在普通和 Visual/Select 模式覆盖原生挂起，需要时使用 `:suspend`。
 - `Ctrl+h/j/k/l` 与 `Ctrl+方向键` 统一表示跨单词/段落移动；因此原生 `{` / `}` 已禁用，`Ctrl+l` 的原生清高亮、diff 更新和重绘也不再有快捷键。

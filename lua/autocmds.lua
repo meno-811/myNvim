@@ -28,6 +28,19 @@ vim.api.nvim_create_autocmd("FileType", {
         vim.opt_local.linebreak = true
     end,
 })
+-- y/yy/Ctrl+c 与 Ctrl+v 共用系统剪贴板；删除操作不改动它，p 仍读内部寄存器。
+vim.api.nvim_create_autocmd("TextYankPost", {
+    group = group,
+    desc = "Mirror yanks to the system clipboard",
+    callback = function()
+        local event = vim.v.event
+        if vim.fn.has("clipboard") == 0 or event.operator ~= "y" then return end
+        -- 显式 yank 到系统寄存器时无需重复写入；"_ 寄存器保持原样。
+        if event.regname == "_" or event.regname == "+" or event.regname == "*" then return end
+        vim.fn.setreg("+", event.regcontents, event.regtype)
+    end,
+})
+
 vim.api.nvim_create_autocmd("InsertEnter", {
     group = group,
     desc = "Hide diagnostic messages while typing",
