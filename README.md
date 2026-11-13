@@ -51,7 +51,9 @@ bash ./install-nvim.sh
 | `Ctrl+k/j`（普通 / 可视）或 `Ctrl+↑/↓` | 上一个 / 下一个段落 |
 | `Shift+方向键` | 像普通输入框一样开始或扩展选区 |
 | `Shift+h/j/k/l`（非 Neo-tree） | 等同于 `Shift+←/↓/↑/→` |
-| `Ctrl+v`（普通模式） | 块可视模式（原生行为） |
+| `Ctrl+c`（可视 / Select 模式） | 复制选区到系统剪贴板 |
+| `Ctrl+v` | 从系统剪贴板粘贴 |
+| `Ctrl+q`（普通模式） | 块可视模式 |
 | `gc` / `gcc` | 注释操作符 / 切换当前行注释 |
 | `*` / `#` | 向后 / 向前搜索光标下单词 |
 | `:noh` | 清除搜索高亮和滚动条搜索标记 |
@@ -60,7 +62,11 @@ bash ./install-nvim.sh
 
 Shift 选择使用 Neovim Select 模式：进入后可用方向键或 `Shift+方向键` 继续调整选区，直接输入会替换选中内容，`Esc` 取消选择。`Shift+Home/End/PageUp/PageDown` 也遵循同一规则。
 
-多行插入相同内容：`Ctrl+v` 选择多行，按大写 `I` 输入，最后按 `Esc` 应用到全部选中行。
+多行插入相同内容：`Ctrl+q` 选择多行，按大写 `I` 输入，最后按 `Esc` 应用到全部选中行。
+
+`Ctrl+c` / `Ctrl+v` 只访问系统剪贴板；原生 `y`、`yy`、`p` 仍使用 Neovim 内部寄存器，不会动系统剪贴板。普通模式的 `Ctrl+c` 保留原生取消语义。
+
+系统剪贴板走终端的 OSC 52：复制方向由终端写入本机剪贴板，一般可用；粘贴方向需要终端应答读取请求，多数终端（含 Termius）只实现写入，此时 `Ctrl+v` 会等待约 10 秒后粘贴为空。这种情况请改用终端自带的粘贴（Termius 的粘贴按钮或长按），它通过 bracketed paste 直接送入按键流。本机有图形环境时会自动使用 `xclip` / `wl-copy` 等 provider，双向都正常。
 
 普通模式双击鼠标左键保留原生的单词选择。插入模式的左右键可以跨行；在首行继续按 `↑` 到行首，在末行继续按 `↓` 到行尾。
 
@@ -103,7 +109,7 @@ Neo-tree 中最后一项再按 `↓` 回到第一项。`Ctrl+↑/↓` 跳到前�
 | 快捷键 | 功能 |
 | --- | --- |
 | `Ctrl+\` | 打开或关闭 ToggleTerm；Claude Code 终端输入模式下也可直接使用 |
-| `Alt+i`（终端输入模式） | Claude Code 显示历史视图，其他终端进入普通模式 |
+| `Alt+i`（终端输入模式） | 进入终端普通模式；Claude Code 历史视图改为普通模式下按 `<Leader>m` |
 | `<Leader>ac` | 打开或切换 Claude Code，并进入输入状态 |
 | `<Leader>af` | 聚焦 Claude Code 并进入输入状态 |
 | `<Leader>as` | 发送选区、添加文件或聚焦 Claude Code，并进入输入状态 |
@@ -125,7 +131,15 @@ Markdown 预览是终端内渲染，不提供浏览器式字号和图片排版�
 另附claude code官方下载命令
 curl -fsSL https://claude.ai/install.sh | bash
 
+## 交互式项目导览
+
+仓库内的 `project-walkthrough/` 是一个 Claude Code skill：在 Neovim 里逐步讲解代码，自动打开文件、定位并高亮相关行，再在 Claude Code 侧暂停等你选择继续、深入或查看调用关系。只读，不修改项目文件。
+
+本机已通过 `~/.claude/skills/project-walkthrough` 符号链接到该目录，因此全局可用，仓库内修改即时生效。其他机器需建立同样的链接；`scripts/navigate.sh` 依赖该路径。
+
 ## Claude 历史视图修正
-由于claude code有一些窗口适配问题，由于是Claude code自己的问题，不管是nvim还是claude code插件都无法解决这个问题。所以通过直接读取.claude里的历史文件获取文本并做成了一个浮窗展示伪装成claude 的所有非插件模式。由于完全没有更改操作途径，所以这里仅作简单说明
+由于claude code有一些窗口适配问题，无法靠 nvim 或插件侧修正。这里直接读取 `.claude` 里的历史文件取文本，渲染成只读浮窗。浮窗不再自动接管终端窗口，只在 Claude 缓冲区普通模式下按 `<Leader>m` 打开；打开后按 `i` 返回 Claude 输入。
+
+浮窗中每条消息的发送者以一级标题显示（`# 你` / `# Claude`）。
 
 Claude 进程退出时，历史和全屏浮窗随终端一起关闭。

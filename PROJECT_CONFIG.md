@@ -1,6 +1,6 @@
 # Neovim 配置维护说明
 
-最后核对日期：2026-10-19
+最后核对日期：2026-11-13
 
 本文只记录当前结构、设计取舍、已确认行为和排错结论，不充当变更日志。面向用户的安装与操作说明放在 `README.md`。
 
@@ -45,6 +45,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 | `lua/plugins/daps.lua` | Go/Python DAP 与 dap-ui |
 | `lua/plugins/git.lua` | gitsigns、LazyGit、git-conflict |
 | `lua/plugins/markdown.lua` | Markdown 终端内渲染 |
+| `project-walkthrough/` | 交互式代码导览 skill：`SKILL.md` 加 `scripts/navigate.sh`、`navigate.lua`，通过 `$NVIM` RPC 打开文件、定位并高亮代码 |
 | `install-nvim.sh` | 按 Linux 架构安装或更新 Neovim AppImage |
 
 插件专属快捷键可以留在 spec 的 `keys` 或 `config` 中。例如 `<Leader>e` 同时是 Neo-tree 的延迟加载入口，移到全局映射会破坏按需加载。
@@ -56,7 +57,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - `Loadenv` 使用无启动配置的 Bash 子进程，以 `set -a` 执行 `source`，比较执行前后的 NUL 分隔环境快照，仅将变化和删除同步到 `vim.env`。脚本失败或未完成快照时不导入；Windows 优先标准位置的 Git Bash，避免 WSL 别名。变量只存在当前进程和之后启动的子进程中，已有终端/LSP 需重启；不导入函数、别名或工作目录变化。
 
 - Leader 是空格。普通和可视模式先吞掉未配置的单个可打印组合，实际映射再覆盖，因此 `Space+i` 不会回退执行原生 `i`，`Space+a` 超时也不会执行原生 `a`。
-- `Ctrl+a` 在普通和可视模式全选，插入模式保留原生“插入上次输入文本”；`Ctrl+n` 在普通和可视模式调用原生数字加一；Visual/Select 模式的 `Ctrl+c` 写入系统 `+` 剪贴板；`Ctrl+v` 在普通、插入、Visual/Select 和终端输入模式通过 `nvim_paste()` 粘贴系统 `+` 剪贴板，命令行使用原生寄存器插入，块选择改用原生 `Ctrl+q`；`Ctrl+s` 保存，插入模式会先退出；`Ctrl+z` / `Ctrl+Shift+z` 在普通、插入、Visual/Select 模式撤销 / 重做。
+- `Ctrl+a` 在普通和可视模式全选，插入模式保留原生“插入上次输入文本”；`Ctrl+n` 在普通和可视模式调用原生数字加一；`Ctrl+c` 在 Visual/Select 模式写入系统 `+` 剪贴板，普通模式保留原生取消语义；`Ctrl+v` 在普通模式 `"+p`、Visual/Select 模式 `"+p`（Select 模式加 `<C-g>` 前缀避免可打印字符被当成输入）、插入模式 `<C-r><C-o>+`、命令行 `<C-r>+`、终端输入模式 `nvim_paste()`；`'clipboard'` 未启用，原生 `y`/`yy`/`p` 只使用内部寄存器；块选择改用原生 `Ctrl+q`；`Ctrl+s` 保存，插入模式会先退出；`Ctrl+z` / `Ctrl+Shift+z` 在普通、插入、Visual/Select 模式撤销 / 重做。
 - `Alt+i` 在插入模式返回普通模式，在终端输入模式进入终端普通模式，作为统一的“退出当前输入状态”按键。
 - Termius 的 `Alt+·` 实测识别为 Alt 加反引号，在 `key_map.lua` 映射为 `Esc`。
 - 普通模式保留原生 `Ctrl+o/i`（或 `Tab`）跳转列表后退/前进。`Ctrl+d` 改为两阶段诊断浮窗；LSP buffer 中的 `Ctrl+f` 改为两阶段 hover，其他 buffer 仍为原生整页向下。
@@ -131,6 +132,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 
 - 文本窗口中的 `H/J/K/L` 覆盖屏幕顶端、合并行、关键词查询和屏幕底端，改为 Shift 选择；Neo-tree 和操作符等待模式不覆盖。
 - 普通模式 `Ctrl+d` 覆盖半页向下；LSP buffer 中的 `Ctrl+f` 覆盖整页向下。
+- `Ctrl+v` 覆盖普通模式块选择、插入模式字面量输入和命令行字面量输入，统一改为系统剪贴板粘贴；块选择改用 `Ctrl+q`，字面量输入需要时用 `Ctrl+q`/`<C-q>` 或终端能力自行输入。终端输入模式 `Ctrl+v` 也改为粘贴，原先给终端的原始按键不再透传。
 - 普通和可视模式 `Ctrl+a` 覆盖数字递增，改用 `Ctrl+n` 加一；插入模式 `Ctrl+a` 保持原生。`Ctrl+x` 的递减仍保留。可视模式原生的 `g<C-a>` / `g<C-x>` 序列递增/递减仍可使用，但需以实际终端按键传输为准。
 - `Ctrl+z` 在普通和 Visual/Select 模式覆盖原生挂起，需要时使用 `:suspend`。
 - `Ctrl+h/j/k/l` 与 `Ctrl+方向键` 统一表示跨单词/段落移动；因此原生 `{` / `}` 已禁用，`Ctrl+l` 的原生清高亮、diff 更新和重绘也不再有快捷键。
@@ -146,7 +148,8 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ### 字体与远程环境
 
 - nvim-web-devicons 需要 Nerd Font 3.3+。终端 Neovim 的字体由本地终端控制，`guifont` 不生效；WSL/SSH 也应配置连接端的终端字体。
-- SSH 中 `options.lua` 将剪贴板 provider 设为 OSC 52，支持远端 Neovim 复制到本机剪贴板。反向粘贴通常由终端完成；tmux/screen 还需允许 OSC 52 透传。
+- SSH 中 `options.lua` 将剪贴板 provider 设为 OSC 52，支持远端 Neovim 复制到本机剪贴板。粘贴方向依赖终端应答 OSC 52 读查询；2026-11-13 实测 Termius 只应答能力查询（XTGETTCAP `Ms`）和 DA1，对 `\e]52;c;?` 零响应，因此 `Ctrl+v` 只能等到 10 秒超时后粘空。终端侧自带的粘贴走 bracketed paste，不受影响。tmux/screen 还需允许 OSC 52 透传。
+- 剪贴板读失败时 `getreg("+")` 返回空字符串，不会报错；若看到旧文本，那是 shada 恢复的 `"` / `0` / 数字寄存器，不是系统剪贴板。
 - `install-nvim.sh` 将 `x86_64/amd64` 映射到 x86_64 AppImage，将 `aarch64/arm64` 映射到 arm64；其他架构直接报错。脚本用临时文件和原子替换更新 `/usr/bin/nvim`。
 
 ### 受控环境中的无界面测试
@@ -179,9 +182,16 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ## Claude 历史视图
 
 - Claude CLI 通过 `--settings` 加载 `SessionStart` 钩子。Windows 和 Linux 共用 `nvim -l claude-session.lua`。钩子将当前会话的 `transcript_path` 写入本次 Neovim 实例的临时文件。
-- `lua/utils/claude_history.lua` 从 JSONL 提取用户和助手文本，用 Markdown 渲染；记录不可用时回退到终端快照。只读浮窗覆盖原终端，按 `i` 或使用快捷键返回终端输入时关闭，切窗时保留，底层终端窗口关闭时清理。
+- `lua/utils/claude_history.lua` 从 JSONL 提取用户和助手文本，用 Markdown 渲染；每条消息以一级标题 `# 你` / `# Claude` 开头；记录不可用时回退到终端快照。只在 Claude 缓冲区普通模式下按 `<Leader>m` 打开，不再由 WinEnter 自动接管；浮窗按 `i` 或使用快捷键返回终端输入时关闭，切窗时保留，底层终端窗口关闭时清理。
 - Claude 终端和历史缓冲区各自绑定局部 `Alt+x`，共用底层 Snacks zoom 状态。退出全屏时重新聚焦 Claude 侧栏。历史浮窗按新尺寸显示同一份内容并保留光标位置。
 
-Claude 终端的缓冲区局部 WinEnter 在焦点稳定后检查普通模式并打开历史浮窗。显式进入终端输入会取消尚未执行的历史打开请求。浮窗底部提示条是只读界面的一部分。
+Claude 终端缓冲区只在普通模式映射 `<Leader>m` 打开历史浮窗，不再注册 WinEnter 自动接管；终端输入模式回到普通模式用全局 `Alt+i`。浮窗底部提示条是只读界面的一部分。
 
 Claude 进程退出时，TermClose 清理附属历史浮窗和 Snacks 全屏浮窗；侧栏由插件关闭。
+
+## 交互式项目导览 skill
+
+- `project-walkthrough/` 是仓库内的 Claude Code skill，`SKILL.md` 定义逐步讲解流程，`scripts/navigate.sh` 通过 `$NVIM` RPC 打开文件并把光标移到指定行、高亮范围、执行 `zz`；`navigate.lua` 是被调用的实际实现。只读，不改源文件。
+- 本机通过 `~/.claude/skills/project-walkthrough` 符号链接到该目录，因此全局可用；仓库内修改即时同步，无需拷贝。该链接属于用户环境，不在本仓库中。
+- `navigate.sh` 内路径引用 `$HOME/.claude/skills/project-walkthrough/scripts/`，依赖上述符号链接；在其他机器上使用需先建立同样的链接。
+- 无可用的 `$NVIM` 时降级为仅用 `path:line` 文本引用，交互节奏仍由 `AskUserQuestion` 控制。

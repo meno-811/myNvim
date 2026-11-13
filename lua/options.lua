@@ -24,7 +24,7 @@ local options = {
     virtualedit = "block,onemore",
     whichwrap = "b,s,<,>,h,l",
     mouse = "a",
-    -- clipboard = "unnamedplus",
+    -- 系统剪贴板只由 Ctrl+c / Ctrl+v 显式访问；原生 y/p 使用内部寄存器。
 }
 
 for name, value in pairs(options) do

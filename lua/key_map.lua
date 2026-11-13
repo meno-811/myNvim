@@ -30,6 +30,20 @@ map({ "n", "v" }, "<C-s>", "<Cmd>write<CR>", { desc = "Save file" })
 map("i", "<C-s>", "<Esc><Cmd>write<CR>", { desc = "Save file and leave insert mode" })
 map({ "n", "x" }, "<C-a>", "ggVG", { desc = "Select all" })
 map({ "n", "x" }, "<C-n>", "<C-a>", { desc = "Increment number" })
+-- 系统剪贴板只走 Ctrl+c / Ctrl+v；原生 y/yy/p 仍使用内部寄存器。
+-- 可视与 Select 模式用 <C-g> 开头，避免 Select 模式把可打印字符当作输入。
+-- 普通模式 Ctrl+c 保留原生取消语义，不改成复制。
+map("v", "<C-c>", '"+y', { desc = "Copy selection to clipboard" })
+map("s", "<C-c>", '<C-g>"+y', { desc = "Copy selection to clipboard" })
+map("n", "<C-v>", '"+p', { desc = "Paste clipboard" })
+map("v", "<C-v>", '"+p', { desc = "Paste clipboard over selection" })
+map("s", "<C-v>", '<C-g>"+p', { desc = "Paste clipboard over selection" })
+map("i", "<C-v>", "<C-r><C-o>+", { desc = "Paste clipboard" })
+map("c", "<C-v>", "<C-r>+", { desc = "Paste clipboard" })
+map("t", "<C-v>", function()
+    vim.api.nvim_paste(vim.fn.getreg("+"), true, -1)
+end, { desc = "Paste clipboard" })
+-- Ctrl+v 已改为粘贴；块选择改用原生 Ctrl+q。
 map("i", "<A-i>", "<Esc>", { desc = "Leave insert mode" })
 map({ "n", "i", "v", "o", "c", "t" }, "<M-`>", "<Esc>", { desc = "Escape (Termius Alt+·)" })
 map("t", "<A-i>", [[<C-\><C-n>]], { desc = "Enter terminal normal mode" })
