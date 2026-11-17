@@ -28,7 +28,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 | `lua/options.lua` | 行号、缩进、搜索、鼠标、剪贴板、`virtualedit`、`whichwrap` 等原生选项 |
 | `lua/key_map.lua` | 严格 Leader、编辑/导航/窗口快捷键、诊断浮窗和鼠标交互 |
 | `lua/autocmds.lua` | 外部文件检查、文件类型折行、插入模式诊断文字切换 |
-| `lua/commands.lua` | `Loadenv` 会话环境加载、`MessagesBuffer`、`Readme` 及浮窗局部行为 |
+| `lua/commands.lua` | `Loadenv` 会话环境加载、`MessagesBuffer`、`Readme` 及基于 Snacks.win 的只读浮窗 |
 | `lua/utils/buffer.lua` | 基于 Snacks 的安全 buffer 关闭与全窗口跳转列表重置 |
 | `lua/plugins/astrocore.lua` | 诊断基础配置与 Treesitter 适配 |
 | `lua/plugins/lsp.lua` | Mason、LSP 配置、LspAttach 映射、hover 和引用行为 |

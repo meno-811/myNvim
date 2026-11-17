@@ -48,58 +48,34 @@ env -0
     vim.notify("Loadenv: 已加载 " .. path)
 end, { nargs = 1, complete = "file", desc = "加载当前 Neovim 会话的环境变量" })
 
+local function readonly_float(lines, opts)
+    return require("snacks").win(vim.tbl_deep_extend("force", {
+        text = lines,
+        minimal = true,
+        border = "rounded",
+        title_pos = "center",
+        bo = { modifiable = false, bufhidden = "wipe" },
+        keys = { ["<Esc>"] = "close", ["<Leader>q"] = "close" },
+    }, opts))
+end
+
 vim.api.nvim_create_user_command("MessagesBuffer", function()
-    -- 再次执行命令时关闭窗口
-    if messages_win and vim.api.nvim_win_is_valid(messages_win) then
-        vim.api.nvim_win_close(messages_win, true)
-        messages_win = nil
+    if messages_win and messages_win:valid() then
+        messages_win:close()
         return
     end
 
-    local messages = vim.fn.execute("messages")
-    local lines = vim.split(messages, "\n", { plain = true })
-    local buf = vim.api.nvim_create_buf(false, true)
-
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-    vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
-    vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
-
-    local width = math.max(1, vim.o.columns - 4)
-    local max_height = math.max(5, math.floor(vim.o.lines * 0.35))
-    local height = math.min(math.max(#lines, 5), max_height)
-
-    messages_win = vim.api.nvim_open_win(buf, true, {
-        relative = "editor",
+    local lines = vim.split(vim.fn.execute("messages"), "\n", { plain = true })
+    messages_win = readonly_float(lines, {
         row = 1,
         col = 2,
-        width = width,
-        height = height,
-        style = "minimal",
-        border = "rounded",
+        width = math.max(1, vim.o.columns - 4),
+        height = math.min(math.max(#lines, 5), math.max(5, math.floor(vim.o.lines * 0.35))),
         title = " Messages ",
-        title_pos = "center",
         zindex = 60,
+        wo = { wrap = false },
     })
-
-    vim.api.nvim_set_option_value("wrap", false, { win = messages_win })
-
-    -- 默认定位到最新消息
-    vim.api.nvim_win_set_cursor(messages_win, { math.max(#lines, 1), 0 })
-
-    local close = function()
-        if messages_win and vim.api.nvim_win_is_valid(messages_win) then
-            vim.api.nvim_win_close(messages_win, true)
-        end
-        messages_win = nil
-    end
-
-    for _, key in ipairs({ "q", "<Esc>", "<Leader>q" }) do
-        vim.keymap.set("n", key, close, {
-            buffer = buf,
-            silent = true,
-            desc = "关闭消息窗口",
-        })
-    end
+    vim.api.nvim_win_set_cursor(messages_win.win, { math.max(#lines, 1), 0 })
 end, {
     desc = "在顶部浮动窗口中显示消息记录",
 })
@@ -109,9 +85,8 @@ local readme_win = nil
 -- 在只读浮窗中显示这套 Neovim 配置自己的 README，
 -- 不受当前工作目录或正在编辑的代码项目影响。
 vim.api.nvim_create_user_command("Readme", function()
-    if readme_win and vim.api.nvim_win_is_valid(readme_win) then
-        vim.api.nvim_win_close(readme_win, true)
-        readme_win = nil
+    if readme_win and readme_win:valid() then
+        readme_win:close()
         return
     end
 
@@ -129,44 +104,17 @@ vim.api.nvim_create_user_command("Readme", function()
         return
     end
 
-    local lines = vim.fn.readfile(readme)
-    local buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-    vim.bo[buf].filetype = "markdown"
-    vim.bo[buf].modifiable = false
-    vim.bo[buf].bufhidden = "wipe"
-
     local width = math.max(20, math.floor(vim.o.columns * 0.8))
     local height = math.max(8, math.floor(vim.o.lines * 0.8))
-    readme_win = vim.api.nvim_open_win(buf, true, {
-        relative = "editor",
+    readme_win = readonly_float(vim.fn.readfile(readme), {
         row = math.floor((vim.o.lines - height) / 2),
         col = math.floor((vim.o.columns - width) / 2),
         width = width,
         height = height,
-        style = "minimal",
-        border = "rounded",
         title = " README.md ",
-        title_pos = "center",
+        bo = { filetype = "markdown" },
+        wo = { wrap = true, linebreak = true },
     })
-
-    vim.wo[readme_win].wrap = true
-    vim.wo[readme_win].linebreak = true
-
-    local close = function()
-        if readme_win and vim.api.nvim_win_is_valid(readme_win) then
-            vim.api.nvim_win_close(readme_win, true)
-        end
-        readme_win = nil
-    end
-
-    for _, key in ipairs({ "q", "<Esc>", "<Leader>q" }) do
-        vim.keymap.set("n", key, close, {
-            buffer = buf,
-            silent = true,
-            desc = "关闭 README 窗口",
-        })
-    end
 end, {
     desc = "在浮动窗口中显示 Neovim 配置 README",
 })
