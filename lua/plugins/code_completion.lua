@@ -18,6 +18,15 @@ return {
       local cmp = require("cmp")
       local luasnip = require("luasnip")
       
+      local confirm = cmp.mapping.confirm({ select = false })
+      local function confirm_selected(fallback)
+        if cmp.visible() and cmp.get_selected_entry() then
+          confirm(fallback)
+        else
+          fallback()
+        end
+      end
+
       -- ========== Insert 模式配置 nvim-cmp ==========
       cmp.setup({
         preselect = cmp.PreselectMode.None,
@@ -34,13 +43,7 @@ return {
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),             -- Ctrl+B 向上滚动补全文档（浮动窗口）
           ['<C-f>'] = cmp.mapping.scroll_docs(4),             -- Ctrl+F 向下滚动补全文档（浮动窗口）
           ['<C-e>'] = cmp.mapping.abort(),                  -- Ctrl+E 关闭补全菜单
-          ['<CR>'] = cmp.mapping(function(fallback)
-            if cmp.visible() and cmp.get_selected_entry() then
-              cmp.confirm({ select = false })
-            else
-              fallback()
-            end
-          end, { 'i', 's' }), -- 回车确认手动选择的候选项，否则正常换行
+          ['<CR>'] = cmp.mapping(confirm_selected, { 'i', 's' }),
           -- Tab 确认选中的候选项，未选择时应用首项；无菜单时执行代码片段跳转或默认行为
           ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
@@ -78,13 +81,7 @@ return {
             fallback()
           end
         end, { "c" }),
-        ["<CR>"] = cmp.mapping(function(fallback)
-          if cmp.visible() and cmp.get_selected_entry() then
-            cmp.confirm({ select = false })
-          else
-            fallback()
-          end
-        end, { "c" }),
+        ["<CR>"] = cmp.mapping(confirm_selected, { "c" }),
         ["<Down>"] = cmp.mapping(cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }), { "c" }),
         ["<Up>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }), { "c" }),
         ["<S-Tab>"] = cmp.mapping(cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }), { "c" }),
