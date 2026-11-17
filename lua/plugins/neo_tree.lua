@@ -75,6 +75,14 @@ return {
           local target = state.tree:get_node(row == last and 1 or row + 1)
           if target then require("neo-tree.ui.renderer").focus_node(state, target:get_id()) end
         end,
+        -- 同回车打开文件，打开后关闭文件树；目录仍只展开/折叠。
+        open_close_tree = function(state)
+          local node = state.tree:get_node()
+          state.commands.open(state)
+          if node and node.type == "file" then
+            require("neo-tree.command").execute({ action = "close" })
+          end
+        end,
         -- 使用 Neovim 的 UI 打开文件（跨平台）
         system_open = function(state)
           vim.ui.open(state.tree:get_node():get_id())
@@ -134,6 +142,7 @@ return {
           -- ["<BS>"] = false,
           ["<bs>"] = false,
           ["<S-CR>"] = "system_open", -- Shift+Enter 使用 system_open
+          ["<C-CR>"] = "open_close_tree", -- Ctrl+Enter 打开文件后关闭文件树；回车保留文件树
           ["<space>"] = false, -- 取消空格默认映射
           ["[b"] = "prev_source", -- 切换到上一个 source
           ["]b"] = "next_source", -- 切换到下一个 source
@@ -155,12 +164,6 @@ return {
       },
 
       event_handlers = {
-        {
-          event = "file_opened",
-          handler = function()
-            require("neo-tree.command").execute({ action = "close" })
-          end,
-        },
         {
           event = "neo_tree_buffer_enter", -- 进入 neo-tree buffer 时触发
           handler = function()
