@@ -125,8 +125,6 @@ return {
           map("n", "<C-f>", vim.lsp.buf.hover, "Hover")
           map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
           map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
-          map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
-          map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
           -- map("n", "<leader>e", vim.diagnostic.open_float, "Line Diagnostic")
 
           -- 光标停在符号上时，高亮当前符号及文档内的其他引用。

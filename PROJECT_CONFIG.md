@@ -93,6 +93,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 
 ### LSP、诊断与滚动条
 
+- `[d` / `]d` 使用 Neovim 默认诊断映射。
 - Mason 安装 `gopls`、`pyright`、`lua_ls`、`rust_analyzer`。Python 由 Pyright 诊断、Black 格式化；Go 只用 gopls 格式化，避免重复 provider。
 - LSP buffer 中的 `Ctrl+f` 打开 hover 后自动进入浮窗，再按关闭；关闭映射只挂在带 `textDocument/hover` 标记的浮窗。
 - `grr` 不包含声明：0 个结果提示，1 个直接跳转，多个进入 quickfix，回车跳转后关闭列表。`gri` 跳转到实现；原生 `gi` 和 `gr` 前缀保持可用。
