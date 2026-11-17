@@ -122,6 +122,8 @@ Claude Code 终端和它的历史浮窗会记住离开时的状态：离开前�
 
 Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口；未完成的 `Ctrl+w` 前缀超时后会被忽略，不会传给终端。终端普通模式下按 `<Leader>q` 只隐藏窗口，不会结束会话；终端输入模式也可直接使用 `Alt+x` 切换全屏浮窗。
 
+Claude 启动时禁用新版 fullscreen 渲染器的备用屏幕（`CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1`）。备用屏幕下 Neovim 终端不保留 scrollback，普通模式就无法向上滚动查看历史输出。
+
 ## Markdown
 
 | 快捷键 | 功能 |

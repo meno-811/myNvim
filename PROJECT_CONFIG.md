@@ -121,6 +121,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 - Claude 终端在输入或普通模式都可使用 `Alt+x` 切换 Snacks 全屏浮窗，底下的编辑窗口、buffer 和 Claude 进程都保留。
 - Claude 窗口里的 `<Leader>q` 调用窗口 `hide()`，保留 Claude 进程和 WebSocket；不要用删除 terminal buffer 代替隐藏。
 - Claude 缓冲区普通模式局部映射 `<Leader>m` 打开历史浮窗，覆盖全局 Markdown 渲染开关。
+- 插件 `env` 固定注入 `CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1`。新版 Claude 的 fullscreen 渲染器启动即发送 `ESC[?1049h` 进入备用屏幕；Neovim 终端在备用屏幕下丢弃 scrollback（缓冲区只剩当前一屏行数），普通模式的 `k`/`PageUp` 等上滚全部无效。这是 Claude 版本差异，不是本配置的按键问题：classic 渲染器的设备不受影响。实测注入后 pty 输出不再含 `1049h`，终端缓冲区保留历史，`G` 后可正常上滚。
 
 ## 保留的定制与理由
 

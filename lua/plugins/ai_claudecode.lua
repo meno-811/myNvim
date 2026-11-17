@@ -51,6 +51,9 @@ return {
     dependencies = { "folke/snacks.nvim" },
     opts = {
       terminal_cmd = history.terminal_command(),
+      -- 新版 Claude 的 fullscreen 渲染器会进入备用屏幕（ESC[?1049h），
+      -- Neovim 终端在备用屏幕下不保留 scrollback，普通模式无法向上滚动。
+      env = { CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN = "1" },
       terminal = {
         git_repo_cwd = true,
         auto_insert = false,
