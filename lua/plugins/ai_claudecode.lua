@@ -91,6 +91,18 @@ return {
                 nowait = false,
                 desc = "Claude 窗口命令前缀",
               })
+              -- Claude buffer 不参与 Ctrl+w w 的跳转循环：普通文件之间循环时跳过它，
+              -- 但在 Claude 窗口内仍按原生行为跳到下一个窗口。
+              vim.b[self.buf].claude_code = true
+              for _, lhs in ipairs { "<C-w>w", "<C-w><C-w>" } do
+                vim.keymap.set("n", lhs, function()
+                  if vim.b.claude_code then return vim.cmd("wincmd w") end
+                  for _ = 1, #vim.api.nvim_tabpage_list_wins(0) do
+                    vim.cmd("wincmd w")
+                    if not vim.b.claude_code then return end
+                  end
+                end, { silent = true, desc = "切换到下一个窗口（跳过 Claude）" })
+              end
             end)
           end,
           keys = {

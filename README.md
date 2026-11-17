@@ -81,7 +81,7 @@ Shift 选择使用 Neovim Select 模式：按 `Shift+方向键` 或 `Shift+Home/
 | `<Leader>e` / `<Leader>o` | 切换文件树 / 在文件树与编辑区间切换焦点 |
 | `<Leader>up` | 显示或隐藏顶部路径栏 |
 | `Alt+x` | 将当前窗口切换为全屏浮窗 |
-| `Ctrl+w` 后接 `h/j/k/l`、方向键或 `w`（普通模式） | 移动窗口或切换到下一窗口 |
+| `Ctrl+w` 后接 `h/j/k/l`、方向键或 `w`（普通模式） | 移动窗口或切换到下一窗口；`Ctrl+w w` 在普通文件间切换时跳过 Claude Code 缓冲区 |
 
 插入模式保留原生的 `Ctrl+w` 删除前一个单词，以及 `Ctrl+h/j/k` 的退格、换行和 Digraph；跨单词或段落可使用 Ctrl 加方向键。
 
@@ -120,7 +120,7 @@ Neo-tree 中最后一项再按 `↓` 回到第一项。`Ctrl+↑/↓` 跳到前�
 
 Claude Code 终端和它的历史浮窗会记住离开时的状态：离开前在输入状态，切回来仍是输入状态；离开前在普通模式，切回来仍是普通模式；离开前在看历史浮窗，切回来仍是历史浮窗。
 
-Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口；未完成的 `Ctrl+w` 前缀超时后会被忽略，不会传给终端。终端普通模式下按 `<Leader>q` 只隐藏窗口，不会结束会话；终端输入模式也可直接使用 `Alt+x` 切换全屏浮窗。
+Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口；未完成的 `Ctrl+w` 前缀超时后会被忽略，不会传给终端。普通文件窗口里按 `Ctrl+w w` 会跳过 Claude Code 缓冲区，只在 Claude 窗口内才会切到它；在 Claude 窗口内按 `Ctrl+w w` 则正常切换到下一个窗口。终端普通模式下按 `<Leader>q` 只隐藏窗口，不会结束会话；终端输入模式也可直接使用 `Alt+x` 切换全屏浮窗。
 
 Claude 启动时禁用新版 fullscreen 渲染器的备用屏幕（`CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1`）。备用屏幕下 Neovim 终端不保留 scrollback，普通模式就无法向上滚动查看历史输出。
 
