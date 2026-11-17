@@ -1,6 +1,39 @@
 -- 原生事件行为；命名分组避免重新加载时重复注册。
 local group = vim.api.nvim_create_augroup("user_editor", { clear = true })
 
+vim.api.nvim_create_autocmd({ "InsertEnter", "BufWritePost" }, {
+    group = group,
+    desc = "Keep edited files in the buffer list",
+    callback = function(event) vim.b[event.buf].keep_open = true end,
+})
+
+vim.api.nvim_create_autocmd({ "BufEnter", "BufAdd" }, {
+    group = group,
+    desc = "Replace the previous preview when opening a new file",
+    callback = function(event)
+        local buf = event.buf
+        local name = vim.api.nvim_buf_get_name(buf)
+        if buf ~= vim.api.nvim_get_current_buf()
+            or vim.bo[buf].buftype ~= "" or not vim.bo[buf].buflisted
+            or name == "" or vim.fn.isdirectory(name) == 1
+            or vim.api.nvim_win_get_config(0).relative ~= "" then return end
+
+        local previous = vim.w.preview_file
+        local first_open = not vim.b[buf].opened_file
+        vim.b[buf].opened_file = true
+        if not first_open then return end
+        vim.w.preview_file = buf
+        if not previous or previous == buf then return end
+
+        vim.schedule(function()
+            if not vim.api.nvim_buf_is_valid(previous) or not vim.bo[previous].buflisted
+                or vim.bo[previous].modified or vim.b[previous].keep_open
+                or #vim.fn.win_findbuf(previous) > 0 then return end
+            vim.cmd.bdelete({ args = { tostring(previous) }, mods = { silent = true } })
+        end)
+    end,
+})
+
 vim.api.nvim_create_autocmd("VimEnter", {
     group = group,
     desc = "Start with empty jump lists",

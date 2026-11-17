@@ -27,7 +27,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 | `init.lua` | 按固定顺序加载配置 |
 | `lua/options.lua` | 行号、缩进、搜索、鼠标、剪贴板、`virtualedit`、`whichwrap` 等原生选项 |
 | `lua/key_map.lua` | 严格 Leader、编辑/导航/窗口快捷键、诊断浮窗和鼠标交互 |
-| `lua/autocmds.lua` | 外部文件检查、文件类型折行、插入模式诊断文字切换 |
+| `lua/autocmds.lua` | 外部文件检查、文件类型折行、插入模式诊断文字切换、临时文件标签 |
 | `lua/commands.lua` | `Loadenv` 会话环境加载、`MessagesBuffer`、`Readme` 及基于 Snacks.win 的只读浮窗 |
 | `lua/utils/buffer.lua` | 基于 Snacks 的安全 buffer 关闭与全窗口跳转列表重置 |
 | `lua/plugins/astrocore.lua` | 诊断基础配置与 Treesitter 适配 |
@@ -83,6 +83,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 | 文本文件 `FileType` | Markdown、text、vimwiki 开启 `wrap` 和 `linebreak` |
 | `TextYankPost` | `operator == "y"` 且寄存器不是 `_` 时用 `setreg()` 把内容和类型写入 `+`；删除、修改和 `_` 寄存器不写剪贴板 |
 | `InsertEnter` / `InsertLeave` | 输入时隐藏诊断 virtual text，离开后恢复；标记和下划线始终保留 |
+| `BufEnter` / `BufAdd` | 登记临时文件，涵盖 Neo-tree 先显示文件再将其加入 buffer 列表的情况 |
 
 ### 补全
 
@@ -103,6 +104,7 @@ Leader 必须先于插件快捷键注册。与插件无关的设置使用 Neovim
 ### Buffer、文件树与 Git
 
 - Bufferline `lazy=false`，启动即显示；使用 Neovim 原生 `[b` / `]b` 切换 buffer，`Leader 1…9` 按编号切换。
+- Bufferline 按 `BufAdd` 加入列表的顺序排列。重新打开已关闭的文件可能沿用旧 buffer 编号，因此再次加入列表时重新记录顺序。`autocmds.lua` 按编辑窗口记录临时文件，首次进入另一个普通文件时延后执行非强制 `:bdelete`，并检查旧文件是否进入过插入模式、保存过、存在未保存修改或仍在窗口中显示。
 - 独立 AstroCore 不初始化完整 AstroNvim 的 `vim.t.bufs`，所以 buffer 关闭统一使用 `Snacks.bufdelete({ wipe=true })`。它负责未保存提示、替代 buffer 和窗口布局。
 - `MessagesBuffer` 的 `<Leader>q` 直接关闭消息浮窗。全局 `<Leader>q` 在普通文件中删除当前 buffer，在 quickfix/location-list 中关闭结果窗口；`:q` 仍是 Neovim 原义。`<Leader>ba` 关闭全部 buffer、`<Leader>bo` 仅保留当前 buffer 后，都会清空所有窗口的跳转列表。Neo-tree 成为最后一个窗口时不退出 Neovim。
 - Neo-tree 不注册 `file_opened` 自动关闭；插件默认打开文件后保留文件树，`Enter` 即原生 `open`。`<C-CR>` 映射到自定义命令 `open_close_tree`：先调用同一 `state.commands.open`，节点是文件时再执行 `action = "close"` 关闭文件树，目录仍只展开/折叠。关闭按 source 无关的 `open` 动作进行，因此 buffers 等 source 也保留文件树。`Y` 复制名称、相对/绝对路径或 URI；这与插件的文件复制队列不是同一功能。`O`/`Shift+Enter` 使用 `vim.ui.open()`。

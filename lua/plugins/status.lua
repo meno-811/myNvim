@@ -44,13 +44,35 @@ return{
             return keys
         end,
         config = function()
+            local position = 0
+            local function record(buf)
+                position = position + 1
+                vim.b[buf].bufferline_position = position
+            end
+            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+                if vim.bo[buf].buflisted then record(buf) end
+            end
+            vim.api.nvim_create_autocmd("BufAdd", {
+                group = vim.api.nvim_create_augroup("user_bufferline_order", { clear = true }),
+                callback = function(event) record(event.buf) end,
+            })
             require("bufferline").setup({
                 options = {
                     -- 禁止从会话恢复手动排列；否则 custom_sort 会覆盖 sort_by。
                     persist_buffer_sort = false,
-                    -- 显示 buffer 编号，方便用数字切换
-                    numbers = "ordinal",  -- 显示 1, 2, 3...
-                    -- numbers = "buffer_id",  -- 显示真实 buffer id
+                    -- Reopening a deleted buffer can reuse its old ID.
+                    sort_by = function(a, b)
+                        return vim.b[a.id].bufferline_position < vim.b[b.id].bufferline_position
+                    end,
+                    -- Bufferline builds number labels before applying sort_by.
+                    numbers = function(buffer)
+                        local rank = 1
+                        local position = vim.b[buffer.id].bufferline_position
+                        for _, buf in ipairs(require("bufferline.utils").get_valid_buffers()) do
+                            if vim.b[buf].bufferline_position < position then rank = rank + 1 end
+                        end
+                        return tostring(rank)
+                    end,
     
                     -- 当前 buffer 高亮样式
                     indicator = {
