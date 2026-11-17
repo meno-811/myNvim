@@ -1,40 +1,6 @@
-# myNvim
-
-个人维护的 Neovim 配置，主要用于 Go、Python、Lua 和 Rust 开发。
-
-## 设计目标
-
-本项目首先追求低记忆负担：不因使用 Vim 而额外维护一套与其他编辑器并行的快捷键体系。`Ctrl+c`、`Ctrl+v`、`Ctrl+z`、`Ctrl+Shift+z`、`Ctrl+a`，以及使用 `Ctrl+←/→` 跨单词移动等已经形成肌肉记忆的通用操作，是评估快捷键取舍时必须优先保障的核心习惯，目标是让它们保持可用且尽可能语义一致。在此基础上尽量保留 Neovim 的原生操作；只有当原生行为与这些通用习惯冲突或明显增加记忆成本时，才进行覆盖或迁移。
-
-## 安装
-
-需要 Neovim 0.12+。图标正常显示还需要终端使用 Nerd Font 3.3+。
-
-```bash
-git clone https://github.com/meno-811/myNvim.git ~/.config/nvim
-```
-
-在 x86_64 或 ARM64 Linux 上，也可以在项目根目录安装或更新最新 AppImage：
-
-```bash
-bash ./install-nvim.sh
-```
-
-首次启动后用 `:Mason` 查看语言服务器和外部工具。
-
-## 常用命令
-
-| 命令 | 功能 |
-| --- | --- |
-| `:Config` | 新建浮动终端并进入 Neovim 配置目录 |
-| `:Loadenv path_of_file` | 用 Bash 加载环境变量，仅影响当前 Neovim 和之后启动的子进程 |
-| `:Readme` / `:readme` | 在浮窗中查看本文档，按 `q` 或 `Esc` 关闭 |
-| `:MessagesBuffer` | 在浮窗中查看完整消息记录，按 `q`、`Esc` 或 `<Leader>q` 关闭 |
-| `:Lazy` / `:Mason` / `:LspInfo` | 查看插件、外部工具和当前 LSP 状态 |
+# myNvim 快捷键
 
 `<Leader>` 是空格。未配置的 Leader 组合会被忽略，不会回退执行普通单键命令。
-
-`:Loadenv .env` 支持文件路径补全，含空格的路径直接输入，无需引号。文件按 Bash `source` 执行，并自动导出普通变量赋值；支持引号、变量引用、命令替换和 `unset`。仅加载可信文件。需要 Bash，Windows 优先使用标准安装位置的 Git Bash。退出 Neovim 后变量不保留，也不会修改父终端或系统环境；已经运行的终端、LSP 等需重启才能继承。只同步环境变量，不同步脚本中的目录切换、函数或别名；脚本失败时不导入环境，但已经执行的外部操作不会回滚。
 
 ## 编辑与导航
 
@@ -66,9 +32,9 @@ Shift 选择使用 Neovim Select 模式：按 `Shift+方向键` 或 `Shift+Home/
 
 `Ctrl+c` 与原生 `y` 走同一套逻辑：`y`、`yy` 和 `Ctrl+c` 在写入内部寄存器的同时也会写入系统剪贴板，删除操作不会。`p` 仍只使用内部寄存器，只有 `Ctrl+v` 从系统剪贴板粘贴。普通模式的 `Ctrl+c` 保留原生取消语义。
 
-系统剪贴板走终端的 OSC 52：复制方向由终端写入本机剪贴板，一般可用；粘贴方向需要终端应答读取请求，多数终端（含 Termius）只实现写入，此时 `Ctrl+v` 会等待约 10 秒后粘贴为空。这种情况请改用终端自带的粘贴（Termius 的粘贴按钮或长按），它通过 bracketed paste 直接送入按键流。本机有图形环境时会自动使用 `xclip` / `wl-copy` 等 provider，双向都正常。
+Termius 中如果 `Ctrl+v` 无法粘贴，使用终端的粘贴按钮或长按粘贴。
 
-普通模式双击鼠标左键保留原生的单词选择。插入模式的左右键可以跨行；在首行继续按 `↑` 到行首，在末行继续按 `↓` 到行尾。
+插入模式的左右键可以跨行；在首行继续按 `↑` 到行首，在末行继续按 `↓` 到行尾。
 
 ## 窗口与文件
 
@@ -118,32 +84,10 @@ Neo-tree 中最后一项再按 `↓` 回到第一项。`Ctrl+↑/↓` 跳到前�
 | `<Leader>am` | 选择 Claude 模型 |
 | `<Leader>aa` / `<Leader>ad` | 接受 / 拒绝 Claude diff |
 
-Claude Code 终端和它的历史浮窗会记住离开时的状态：离开前在输入状态，切回来仍是输入状态；离开前在普通模式，切回来仍是普通模式；离开前在看历史浮窗，切回来仍是历史浮窗。
-
 Claude Code 终端中可用 `Ctrl+w w` 切换到下一个窗口；未完成的 `Ctrl+w` 前缀超时后会被忽略，不会传给终端。普通文件窗口里按 `Ctrl+w w` 会跳过 Claude Code 缓冲区，只在 Claude 窗口内才会切到它；在 Claude 窗口内按 `Ctrl+w w` 则正常切换到下一个窗口。终端普通模式下按 `<Leader>q` 只隐藏窗口，不会结束会话；终端输入模式也可直接使用 `Alt+x` 切换全屏浮窗。
-
-Claude 启动时禁用新版 fullscreen 渲染器的备用屏幕（`CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1`）。备用屏幕下 Neovim 终端不保留 scrollback，普通模式就无法向上滚动查看历史输出。
 
 ## Markdown
 
 | 快捷键 | 功能 |
 | --- | --- |
 | `<Leader>m`（Markdown） | 切换终端内实时渲染；Claude Code 缓冲区普通模式下改为打开历史浮窗 |
-
-Markdown 预览是终端内渲染，不提供浏览器式字号和图片排版。
-
-另附claude code官方下载命令
-curl -fsSL https://claude.ai/install.sh | bash
-
-## 交互式项目导览
-
-仓库内的 `project-walkthrough/` 是一个 Claude Code skill：在 Neovim 里逐步讲解代码，自动打开文件、定位并高亮相关行，再在 Claude Code 侧暂停等你选择继续、深入或查看调用关系。只读，不修改项目文件。
-
-本机已通过 `~/.claude/skills/project-walkthrough` 符号链接到该目录，因此全局可用，仓库内修改即时生效。其他机器需建立同样的链接；`scripts/navigate.sh` 依赖该路径。
-
-## Claude 历史视图修正
-由于claude code有一些窗口适配问题，无法靠 nvim 或插件侧修正。这里直接读取 `.claude` 里的历史文件取文本，渲染成只读浮窗。浮窗不再自动接管终端窗口，只在 Claude 缓冲区普通模式下按 `<Leader>m` 打开；打开后按 `i` 返回 Claude 输入。
-
-浮窗中每条消息的发送者以一级标题显示（`# 你` / `# Claude`）。
-
-Claude 进程退出时，历史和全屏浮窗随终端一起关闭。
